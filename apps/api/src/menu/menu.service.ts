@@ -1,36 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { RestaurantDataService } from '../data/restaurant-data.service';
 
 @Injectable()
 export class MenuService {
+  constructor(private readonly restaurantDataService: RestaurantDataService) {}
+
   getMenu() {
-    return [
-      {
-        category: 'Entrees',
-        active: true,
-        items: [
-          {
-            name: 'Tartare de daurade au gingembre',
-            price: 9500,
-            tags: ['poisson', 'signature']
-          },
-          {
-            name: 'Accras de crevettes du golfe',
-            price: 7500,
-            tags: ['fruits de mer']
-          }
-        ]
-      },
-      {
-        category: 'Plats',
-        active: true,
-        items: [
-          {
-            name: 'Poulet bicyclette facon yassa',
-            price: 11000,
-            tags: ['volaille', 'benin']
-          }
-        ]
-      }
-    ];
+    return this.restaurantDataService.getMenuCategories();
+  }
+
+  updateAvailability(id: string, available: boolean) {
+    return this.restaurantDataService.updateMenuItemAvailability(id, available);
   }
 }
