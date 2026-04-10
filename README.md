@@ -19,13 +19,14 @@ Plateforme modulaire complete pour le restaurant de l'Hotel Cactus, avec site pu
 
 ### Back office restaurant
 
-- login par roles
-- tableau de bord de pilotage
+- login multi-roles
+- dashboard interactif
+- gestion des tables avec statut d'occupation
 - gestion des reservations
 - creation et suivi des commandes clients
 - file cuisine pour le chef
+- role dedie a la caisse
 - gestion de disponibilite du menu
-- encaissement et historique des paiements
 - liste des comptes staff pour les roles direction
 
 ## Roles disponibles
@@ -34,24 +35,18 @@ Plateforme modulaire complete pour le restaurant de l'Hotel Cactus, avec site pu
 - `admin`
 - `server`
 - `chef`
+- `cashier`
 
 ## Comptes de demonstration
 
 - Super admin: `superadmin@cactus.bj` / `SuperAdmin123!`
+- Super admin 2: `superadmin2@cactus.bj` / `SuperAdmin456!`
 - Administrateur: `admin@cactus.bj` / `Admin123!`
+- Administrateur 2: `admin2@cactus.bj` / `Admin456!`
 - Serveur: `server@cactus.bj` / `Server123!`
+- Serveur 2: `server2@cactus.bj` / `Server456!`
 - Chef de cuisine: `chef@cactus.bj` / `Chef123!`
-
-## Structure
-
-```text
-.
-|-- apps
-|   |-- api
-|   `-- web
-|-- .github/workflows
-`-- README.md
-```
+- Caissier: `cashier@cactus.bj` / `Cashier123!`
 
 ## Lancer le projet
 
@@ -65,11 +60,17 @@ npm run dev:web
 - Back office login: `http://localhost:5173/login`
 - API: `http://localhost:3001/api`
 
-## Base de donnees
+## PostgreSQL
 
-Le projet est prepare pour PostgreSQL, mais l'iteration actuelle fonctionne avec des donnees seedees en memoire pour accelerer le developpement du produit.
+Un script SQL de reference est maintenant disponible dans [db/init.sql](/home/samuelsgn/Restaurant-Anyxtech/db/init.sql).
 
-Pour activer la connexion TypeORM/PostgreSQL plus tard:
+Le backend peut tourner sans PostgreSQL avec des donnees seed en memoire. Pour preparer la base de donnees:
+
+```bash
+psql -U postgres -f db/init.sql
+```
+
+Variables d'environnement pour la connexion:
 
 ```bash
 ENABLE_DB=true
@@ -79,6 +80,10 @@ DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=hotel_cactus_restaurant
 ```
+
+## Guide de test complet
+
+La procedure complete de verification fonctionnelle et technique est detaillee dans [testing-guide.md](/home/samuelsgn/Restaurant-Anyxtech/docs/testing-guide.md).
 
 ## Endpoints principaux
 
@@ -92,6 +97,8 @@ DB_NAME=hotel_cactus_restaurant
 
 - `GET /api/auth/me`
 - `GET /api/dashboard/summary`
+- `GET /api/tables`
+- `PATCH /api/tables/:id/status`
 - `GET /api/reservations`
 - `PATCH /api/reservations/:id/status`
 - `GET /api/orders`
@@ -115,5 +122,5 @@ npm run build
 ## Notes d'architecture
 
 - Le site public et le back office vivent dans la meme application frontend mais sur des routes separees.
-- Le backend est decoupe par domaines: auth, reservations, orders, kitchen, payments, dashboard, staff.
-- Le socle est pense pour evoluer vers une vraie persistance PostgreSQL et une integration POS type Hamster.
+- Le backend est decoupe par domaines: auth, reservations, tables, orders, kitchen, payments, dashboard, staff.
+- Le schema SQL represente la cible PostgreSQL a brancher pour la prochaine iteration TypeORM complete.
