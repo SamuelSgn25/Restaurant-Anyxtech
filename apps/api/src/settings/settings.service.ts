@@ -6,36 +6,37 @@ export class SettingsService {
   getRestaurantProfile() {
     const modules: ModuleMetadata[] = [
       {
-        code: 'hero',
+        code: 'public-site',
         enabled: true,
-        title: 'Hero landing',
-        description: 'Bloc d intro premium pour la page d accueil.'
+        title: 'Site public',
+        description: 'Presentation du restaurant, carte et prise de reservation.'
       },
       {
-        code: 'menu',
+        code: 'auth-roles',
         enabled: true,
-        title: 'Carte',
-        description: 'Categories et items de la carte.'
+        title: 'Authentification et roles',
+        description: 'Acces differencies pour super admin, admin, serveur et chef.'
       },
       {
-        code: 'reservations',
+        code: 'orders-kitchen',
         enabled: true,
-        title: 'Reservations',
-        description: 'Flux de contact et futur branchement POS.'
+        title: 'Commandes et cuisine',
+        description: 'Creation, suivi de production et remise au service.'
       },
       {
-        code: 'events',
+        code: 'payments',
         enabled: true,
-        title: 'Evenements',
-        description: 'Brunchs, soirees et activations.'
+        title: 'Paiements caisse',
+        description: 'Historique des encaissements et suivi du chiffre.'
       }
     ];
 
     return {
       brand: 'Restaurant Hotel Cactus',
       city: 'Cotonou',
-      concept: 'Cuisine franco-beninoise',
-      modules
+      concept: 'Cuisine franco-beninoise et operations restaurant connectees',
+      modules,
+      recommendedPosBridge: 'Hamster POS inspired integration layer'
     };
   }
 }
