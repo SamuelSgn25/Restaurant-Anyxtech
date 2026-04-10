@@ -1,13 +1,46 @@
 # Restaurant Hotel Cactus
 
-Plateforme complete et modulaire pour le restaurant de l'Hotel Cactus, concue avec un frontend React + Tailwind et un backend NestJS + PostgreSQL.
+Plateforme modulaire complete pour le restaurant de l'Hotel Cactus, avec site public React + Tailwind et back office restaurant connecte a une API NestJS.
 
 ## Stack
 
 - Frontend: React, Vite, Tailwind CSS, Vitest
-- Backend: NestJS, TypeORM, PostgreSQL, Jest
+- Backend: NestJS, TypeScript, validation DTO, architecture prete pour PostgreSQL
 - CI: GitHub Actions
 - Architecture: monorepo npm workspaces
+
+## Ce qui est maintenant en place
+
+### Site public
+
+- pages vitrine du restaurant
+- univers premium inspire de l'Hotel Cactus
+- structure modulaire par sections reutilisables
+
+### Back office restaurant
+
+- login par roles
+- tableau de bord de pilotage
+- gestion des reservations
+- creation et suivi des commandes clients
+- file cuisine pour le chef
+- gestion de disponibilite du menu
+- encaissement et historique des paiements
+- liste des comptes staff pour les roles direction
+
+## Roles disponibles
+
+- `super_admin`
+- `admin`
+- `server`
+- `chef`
+
+## Comptes de demonstration
+
+- Super admin: `superadmin@cactus.bj` / `SuperAdmin123!`
+- Administrateur: `admin@cactus.bj` / `Admin123!`
+- Serveur: `server@cactus.bj` / `Server123!`
+- Chef de cuisine: `chef@cactus.bj` / `Chef123!`
 
 ## Structure
 
@@ -20,66 +53,67 @@ Plateforme complete et modulaire pour le restaurant de l'Hotel Cactus, concue av
 `-- README.md
 ```
 
-## Philosophie modulaire
-
-Le projet est construit autour de modules autonomes:
-
-- Cote frontend, chaque section de page est un composant independant rendu via `SectionRenderer`.
-- Le contenu est centralise dans `apps/web/src/content/site-content.ts`.
-- Cote backend, chaque domaine est encapsule dans son module Nest: `menu`, `events`, `reservations`, `settings`.
-- Cette structure permet de supprimer, remplacer ou ajouter des modules sans impact transversal important.
-
-Le projet est pense pour evoluer vers un fonctionnement inspire des integrations POS type Hamster:
-
-- activation ou desactivation de modules
-- branchement progressif d'une vraie base PostgreSQL
-- API de reservations
-- synchronisation future avec caisse, CRM ou planning de salle
-
 ## Lancer le projet
 
 ```bash
 npm install
-npm run dev:web
 npm run dev:api
+npm run dev:web
 ```
 
-Frontend: `http://localhost:5173`
+- Frontend: `http://localhost:5173`
+- Back office login: `http://localhost:5173/login`
+- API: `http://localhost:3001/api`
 
-Backend: `http://localhost:3001/api`
+## Base de donnees
+
+Le projet est prepare pour PostgreSQL, mais l'iteration actuelle fonctionne avec des donnees seedees en memoire pour accelerer le developpement du produit.
+
+Pour activer la connexion TypeORM/PostgreSQL plus tard:
+
+```bash
+ENABLE_DB=true
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=hotel_cactus_restaurant
+```
+
+## Endpoints principaux
+
+### Public
+
+- `POST /api/auth/login`
+- `GET /api/menu`
+- `POST /api/reservations`
+
+### Proteges
+
+- `GET /api/auth/me`
+- `GET /api/dashboard/summary`
+- `GET /api/reservations`
+- `PATCH /api/reservations/:id/status`
+- `GET /api/orders`
+- `POST /api/orders`
+- `PATCH /api/orders/:id/status`
+- `GET /api/kitchen/tickets`
+- `PATCH /api/kitchen/tickets/:id/status`
+- `GET /api/payments`
+- `POST /api/payments`
+- `GET /api/staff`
+- `PATCH /api/menu/:id/availability`
 
 ## Scripts utiles
 
 ```bash
-npm run build
 npm test
 npm run lint
+npm run build
 ```
 
-## Endpoints backend
+## Notes d'architecture
 
-- `GET /api/settings/profile`
-- `GET /api/menu`
-- `GET /api/events`
-- `POST /api/reservations`
-
-Exemple de payload pour `POST /api/reservations`:
-
-```json
-{
-  "guestName": "Jean Dupont",
-  "email": "jean@example.com",
-  "guests": 4,
-  "notes": "Table terrasse"
-}
-```
-
-## Inspiration
-
-Le design reprend l'esprit du site de reference de l'Hotel Cactus: tonalite premium, accueil vegetal, mise en avant de l'experience et navigation claire. Les textes, la structure et les visuels ici ont ete recomposes pour une implementation propre, modulaire et maintenable.
-
-## Remarques
-
-- Les images utilisent des URLs externes a titre de placeholder.
-- Les coordonnees peuvent etre remplacees facilement dans les fichiers de contenu.
-- La configuration PostgreSQL passe par les variables `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`.
+- Le site public et le back office vivent dans la meme application frontend mais sur des routes separees.
+- Le backend est decoupe par domaines: auth, reservations, orders, kitchen, payments, dashboard, staff.
+- Le socle est pense pour evoluer vers une vraie persistance PostgreSQL et une integration POS type Hamster.
