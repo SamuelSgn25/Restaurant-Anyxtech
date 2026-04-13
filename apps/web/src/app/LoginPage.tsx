@@ -4,9 +4,13 @@ import { useAuth } from './AuthContext';
 
 const demoAccounts = [
   { role: 'Super admin', email: 'superadmin@cactus.bj', password: 'SuperAdmin123!' },
+  { role: 'Super admin 2', email: 'superadmin2@cactus.bj', password: 'SuperAdmin456!' },
   { role: 'Administrateur', email: 'admin@cactus.bj', password: 'Admin123!' },
+  { role: 'Administrateur 2', email: 'admin2@cactus.bj', password: 'Admin456!' },
   { role: 'Serveur', email: 'server@cactus.bj', password: 'Server123!' },
-  { role: 'Chef de cuisine', email: 'chef@cactus.bj', password: 'Chef123!' }
+  { role: 'Serveur 2', email: 'server2@cactus.bj', password: 'Server456!' },
+  { role: 'Chef de cuisine', email: 'chef@cactus.bj', password: 'Chef123!' },
+  { role: 'Caissier', email: 'cashier@cactus.bj', password: 'Cashier123!' }
 ];
 
 export function LoginPage() {
@@ -40,14 +44,14 @@ export function LoginPage() {
   }
 
   return (
-    <main className="section-shell grid gap-10 py-16 lg:grid-cols-[0.95fr_1.05fr] lg:py-24">
+    <main className="section-shell grid gap-10 py-16 lg:grid-cols-[1fr_1fr] lg:py-24">
       <section className="surface-card bg-forest p-8 text-white sm:p-10">
         <p className="eyebrow !text-gold/80">Espace de gestion</p>
         <h1 className="mt-3 font-display text-5xl leading-tight">
-          Connectez les equipes de salle, de cuisine et de direction.
+          Un dashboard metier pour la direction, la salle, la cuisine et la caisse.
         </h1>
         <p className="mt-4 max-w-xl text-base leading-8 text-white/75">
-          Cette interface pilote les reservations, les commandes clients, le suivi cuisine et la caisse.
+          Choisissez un compte de demonstration pour explorer les differentes vues et permissions.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {demoAccounts.map((account) => (
