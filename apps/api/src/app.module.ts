@@ -10,6 +10,7 @@ import { DataModule } from './data/data.module';
 import { EventsModule } from './events/events.module';
 import { KitchenModule } from './kitchen/kitchen.module';
 import { MenuModule } from './menu/menu.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ReservationsModule } from './reservations/reservations.module';
@@ -28,9 +29,7 @@ const databaseModule =
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     ...databaseModule,
     DataModule,
     AuthModule,
@@ -43,7 +42,8 @@ const databaseModule =
     PaymentsModule,
     DashboardModule,
     StaffModule,
-    TablesModule
+    TablesModule,
+    NotificationsModule
   ],
   providers: [
     {
