@@ -15,7 +15,13 @@ export class SettingsService {
         code: 'auth-roles',
         enabled: true,
         title: 'Authentification et roles',
-        description: 'Acces differencies pour super admin, admin, serveur et chef.'
+        description: 'Acces differencies pour super admin, admins, serveurs, chef et caisse.'
+      },
+      {
+        code: 'tables-floor',
+        enabled: true,
+        title: 'Plan de salle',
+        description: 'Vision des tables, occupation, reservations et nettoyage.'
       },
       {
         code: 'orders-kitchen',

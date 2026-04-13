@@ -7,6 +7,6 @@ describe('SettingsService', () => {
     const profile = service.getRestaurantProfile();
 
     expect(profile.brand).toBe('Restaurant Hotel Cactus');
-    expect(profile.modules.some((entry) => entry.code === 'auth-roles')).toBe(true);
+    expect(profile.modules.some((entry) => entry.code === 'tables-floor')).toBe(true);
   });
 });
