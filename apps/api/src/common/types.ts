@@ -1,16 +1,11 @@
 export type UserRole = 'super_admin' | 'admin' | 'server' | 'chef' | 'cashier';
-
 export type ReservationStatus = 'pending' | 'confirmed' | 'seated' | 'completed' | 'cancelled';
-export type OrderStatus =
-  | 'draft'
-  | 'sent_to_kitchen'
-  | 'in_preparation'
-  | 'ready'
-  | 'served'
-  | 'closed';
+export type OrderStatus = 'draft' | 'sent_to_kitchen' | 'in_preparation' | 'ready' | 'served' | 'closed';
 export type PaymentStatus = 'pending' | 'paid' | 'refunded';
 export type PaymentMethod = 'cash' | 'card' | 'mobile_money';
 export type TableStatus = 'available' | 'occupied' | 'reserved' | 'cleaning';
+export type TableShape = 'round' | 'square' | 'booth';
+export type NotificationType = 'reservation' | 'order' | 'payment' | 'staff' | 'menu' | 'table';
 
 export interface ModuleMetadata {
   code: string;
@@ -36,6 +31,7 @@ export interface MenuItemRecord {
   price: number;
   available: boolean;
   tags: string[];
+  createdBy?: string;
 }
 
 export interface ReservationRecord {
@@ -49,6 +45,7 @@ export interface ReservationRecord {
   status: ReservationStatus;
   source: 'website' | 'staff';
   tableId?: string;
+  preferredZone?: string;
 }
 
 export interface OrderLineRecord {
@@ -86,6 +83,20 @@ export interface RestaurantTableRecord {
   zone: string;
   seats: number;
   status: TableStatus;
+  shape: TableShape;
+  posX: number;
+  posY: number;
+  width: number;
+  height: number;
   activeOrderId?: string;
   activeReservationId?: string;
+}
+
+export interface NotificationRecord {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  createdAt: string;
+  read: boolean;
 }
