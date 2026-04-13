@@ -20,4 +20,8 @@ export class ReservationsService {
   updateStatus(id: string, status: Parameters<RestaurantDataService['updateReservationStatus']>[1]) {
     return this.restaurantDataService.updateReservationStatus(id, status);
   }
+
+  assignTable(id: string, tableId?: string) {
+    return this.restaurantDataService.assignReservationToTable(id, tableId);
+  }
 }

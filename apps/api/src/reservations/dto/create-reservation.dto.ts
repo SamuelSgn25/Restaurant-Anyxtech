@@ -33,4 +33,8 @@ export class CreateReservationDto {
   @IsOptional()
   @IsString()
   tableId?: string;
+
+  @IsOptional()
+  @IsString()
+  preferredZone?: string;
 }
