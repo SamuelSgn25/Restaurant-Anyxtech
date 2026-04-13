@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { Roles } from '../auth/auth.decorators';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { MoveOrderTableDto } from './dto/move-order-table.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { OrdersService } from './orders.service';
 
@@ -8,7 +9,7 @@ import { OrdersService } from './orders.service';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  @Roles('super_admin', 'admin', 'server', 'chef')
+  @Roles('super_admin', 'admin', 'server', 'chef', 'cashier')
   @Get()
   findAll() {
     return this.ordersService.findAll();
@@ -18,6 +19,12 @@ export class OrdersController {
   @Post()
   create(@Body() payload: CreateOrderDto) {
     return this.ordersService.create(payload);
+  }
+
+  @Roles('super_admin', 'admin', 'server')
+  @Patch(':id/table')
+  moveTable(@Param('id') id: string, @Body() payload: MoveOrderTableDto) {
+    return this.ordersService.moveToTable(id, payload.tableId);
   }
 
   @Roles('super_admin', 'admin', 'server', 'chef')

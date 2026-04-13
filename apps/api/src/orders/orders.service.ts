@@ -14,6 +14,10 @@ export class OrdersService {
     return this.restaurantDataService.createOrder(payload);
   }
 
+  moveToTable(id: string, tableId: string) {
+    return this.restaurantDataService.moveOrderToTable(id, tableId);
+  }
+
   updateStatus(id: string, status: Parameters<RestaurantDataService['updateOrderStatus']>[1]) {
     return this.restaurantDataService.updateOrderStatus(id, status);
   }
