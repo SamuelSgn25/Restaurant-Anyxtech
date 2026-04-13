@@ -6,50 +6,36 @@ import { SectionRenderer } from '../modules/sections/SectionRenderer';
 import { useAuth } from './AuthContext';
 import { LoginPage } from './LoginPage';
 import { ManagementPage } from './ManagementPage';
+import { PublicReservationPage } from './PublicReservationPage';
 
 function SitePage({ slug }: { slug: string }) {
   const page = siteContent.pages.find((entry) => entry.slug === slug);
-
-  if (!page) {
-    return <Navigate to="/" replace />;
-  }
-
-  return (
-    <main>
-      {page.sections.map((section, index) => (
-        <SectionRenderer key={`${section.type}-${index}`} section={section} />
-      ))}
-    </main>
-  );
+  if (!page) return <Navigate to="/" replace />;
+  if (slug === '/reservation') return <PublicReservationPage />;
+  return <main>{page.sections.map((section, index) => <SectionRenderer key={`${section.type}-${index}`} section={section} />)}</main>;
 }
 
 function ProtectedManagementRoute() {
   const { user, loading } = useAuth();
   const location = useLocation();
-
-  if (loading) {
-    return <main className="section-shell py-20 text-center text-forest">Chargement...</main>;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
-  }
-
+  if (loading) return <main className="section-shell py-20 text-center text-forest">Chargement...</main>;
+  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   return <ManagementPage />;
 }
 
 export function App() {
+  const location = useLocation();
+  const isBackOfficeScreen = location.pathname === '/login' || location.pathname === '/management';
+
   return (
     <div className="min-h-screen text-ink">
-      <SiteHeader />
+      {!isBackOfficeScreen ? <SiteHeader /> : null}
       <Routes>
-        {siteContent.pages.map((page) => (
-          <Route key={page.slug} path={page.slug} element={<SitePage slug={page.slug} />} />
-        ))}
+        {siteContent.pages.map((page) => <Route key={page.slug} path={page.slug} element={<SitePage slug={page.slug} />} />)}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/management" element={<ProtectedManagementRoute />} />
       </Routes>
-      <SiteFooter />
+      {!isBackOfficeScreen ? <SiteFooter /> : null}
     </div>
   );
 }
