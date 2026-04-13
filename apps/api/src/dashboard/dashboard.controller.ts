@@ -6,7 +6,7 @@ import { RestaurantDataService } from '../data/restaurant-data.service';
 export class DashboardController {
   constructor(private readonly restaurantDataService: RestaurantDataService) {}
 
-  @Roles('super_admin', 'admin', 'server', 'chef')
+  @Roles('super_admin', 'admin', 'server', 'chef', 'cashier')
   @Get('summary')
   summary() {
     return this.restaurantDataService.getDashboardSummary();
