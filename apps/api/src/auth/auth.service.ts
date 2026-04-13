@@ -7,9 +7,7 @@ export class AuthService {
   constructor(private readonly restaurantDataService: RestaurantDataService) {}
 
   login(email: string, password: string) {
-    const user = this.restaurantDataService
-      .getUsers()
-      .find((entry) => entry.email === email && entry.password === password && entry.active);
+    const user = this.restaurantDataService.getUsers().find((entry) => entry.email === email && entry.password === password && entry.active);
 
     if (!user) {
       throw new UnauthorizedException('Identifiants invalides');
@@ -25,9 +23,7 @@ export class AuthService {
     try {
       const decoded = Buffer.from(token, 'base64url').toString('utf8');
       const [userId, role] = decoded.split(':');
-      const user = this.restaurantDataService
-        .getUsers()
-        .find((entry) => entry.id === userId && entry.role === role && entry.active);
+      const user = this.restaurantDataService.getUsers().find((entry) => entry.id === userId && entry.role === role && entry.active);
 
       if (!user) {
         throw new UnauthorizedException('Session invalide');
@@ -37,6 +33,10 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('Token invalide');
     }
+  }
+
+  changePassword(userId: string, currentPassword: string, newPassword: string) {
+    return this.restaurantDataService.updateUserPassword(userId, currentPassword, newPassword);
   }
 
   private createToken(user: StaffUser) {

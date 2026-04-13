@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { Public } from './auth.decorators';
 import { AuthService } from './auth.service';
+import { ChangePasswordDto } from './change-password.dto';
 import { LoginDto } from './login.dto';
 
 @Controller('auth')
@@ -16,5 +17,13 @@ export class AuthController {
   @Get('me')
   me(@Req() request: { user: unknown }) {
     return request.user;
+  }
+
+  @Post('change-password')
+  changePassword(
+    @Req() request: { user: { id: string } },
+    @Body() payload: ChangePasswordDto
+  ) {
+    return this.authService.changePassword(request.user.id, payload.currentPassword, payload.newPassword);
   }
 }
