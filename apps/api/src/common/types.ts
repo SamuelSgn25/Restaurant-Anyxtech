@@ -1,4 +1,4 @@
-export type UserRole = 'super_admin' | 'admin' | 'server' | 'chef';
+export type UserRole = 'super_admin' | 'admin' | 'server' | 'chef' | 'cashier';
 
 export type ReservationStatus = 'pending' | 'confirmed' | 'seated' | 'completed' | 'cancelled';
 export type OrderStatus =
@@ -10,6 +10,7 @@ export type OrderStatus =
   | 'closed';
 export type PaymentStatus = 'pending' | 'paid' | 'refunded';
 export type PaymentMethod = 'cash' | 'card' | 'mobile_money';
+export type TableStatus = 'available' | 'occupied' | 'reserved' | 'cleaning';
 
 export interface ModuleMetadata {
   code: string;
@@ -24,6 +25,7 @@ export interface StaffUser {
   email: string;
   password: string;
   role: UserRole;
+  active: boolean;
 }
 
 export interface MenuItemRecord {
@@ -46,6 +48,7 @@ export interface ReservationRecord {
   notes?: string;
   status: ReservationStatus;
   source: 'website' | 'staff';
+  tableId?: string;
 }
 
 export interface OrderLineRecord {
@@ -57,6 +60,7 @@ export interface OrderLineRecord {
 
 export interface OrderRecord {
   id: string;
+  tableId: string;
   tableLabel: string;
   customerName: string;
   createdAt: string;
@@ -74,4 +78,14 @@ export interface PaymentRecord {
   status: PaymentStatus;
   processedBy: string;
   createdAt: string;
+}
+
+export interface RestaurantTableRecord {
+  id: string;
+  label: string;
+  zone: string;
+  seats: number;
+  status: TableStatus;
+  activeOrderId?: string;
+  activeReservationId?: string;
 }
