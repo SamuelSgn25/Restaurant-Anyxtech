@@ -15,6 +15,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { SettingsModule } from './settings/settings.module';
 import { StaffModule } from './staff/staff.module';
+import { TablesModule } from './tables/tables.module';
 
 const databaseModule =
   process.env.ENABLE_DB === 'true'
@@ -41,7 +42,8 @@ const databaseModule =
     KitchenModule,
     PaymentsModule,
     DashboardModule,
-    StaffModule
+    StaffModule,
+    TablesModule
   ],
   providers: [
     {
