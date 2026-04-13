@@ -1,14 +1,10 @@
 export type UserRole = 'super_admin' | 'admin' | 'server' | 'chef' | 'cashier';
 export type ReservationStatus = 'pending' | 'confirmed' | 'seated' | 'completed' | 'cancelled';
-export type OrderStatus =
-  | 'draft'
-  | 'sent_to_kitchen'
-  | 'in_preparation'
-  | 'ready'
-  | 'served'
-  | 'closed';
+export type OrderStatus = 'draft' | 'sent_to_kitchen' | 'in_preparation' | 'ready' | 'served' | 'closed';
 export type PaymentMethod = 'cash' | 'card' | 'mobile_money';
 export type TableStatus = 'available' | 'occupied' | 'reserved' | 'cleaning';
+export type TableShape = 'round' | 'square' | 'booth';
+export type NotificationType = 'reservation' | 'order' | 'payment' | 'staff' | 'menu' | 'table';
 
 export interface AuthUser {
   id: string;
@@ -44,6 +40,7 @@ export interface MenuItem {
   price: number;
   available: boolean;
   tags: string[];
+  createdBy?: string;
 }
 
 export interface MenuCategory {
@@ -57,6 +54,11 @@ export interface RestaurantTable {
   zone: string;
   seats: number;
   status: TableStatus;
+  shape: TableShape;
+  posX: number;
+  posY: number;
+  width: number;
+  height: number;
   activeOrderId?: string;
   activeReservationId?: string;
 }
@@ -72,6 +74,7 @@ export interface Reservation {
   status: ReservationStatus;
   source: 'website' | 'staff';
   tableId?: string;
+  preferredZone?: string;
 }
 
 export interface OrderItem {
@@ -102,4 +105,41 @@ export interface Payment {
   status: 'pending' | 'paid' | 'refunded';
   processedBy: string;
   createdAt: string;
+}
+
+export interface NotificationItem {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  createdAt: string;
+  read: boolean;
+}
+
+export interface CreateStaffPayload {
+  name: string;
+  email: string;
+  role: UserRole;
+  password: string;
+}
+
+export interface CreateMenuItemPayload {
+  category: string;
+  name: string;
+  description: string;
+  price: number;
+  available?: boolean;
+  tags?: string[];
+}
+
+export interface CreateTablePayload {
+  label: string;
+  zone: string;
+  seats: number;
+  shape: TableShape;
+  posX: number;
+  posY: number;
+  width: number;
+  height: number;
+  status?: TableStatus;
 }
