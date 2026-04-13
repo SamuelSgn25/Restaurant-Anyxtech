@@ -11,7 +11,11 @@ export function StatusBadge({ value }: { value: string }) {
     ready: 'bg-emerald-100 text-emerald-800',
     served: 'bg-sky-100 text-sky-800',
     closed: 'bg-stone-200 text-stone-700',
-    paid: 'bg-emerald-100 text-emerald-800'
+    paid: 'bg-emerald-100 text-emerald-800',
+    available: 'bg-emerald-100 text-emerald-800',
+    occupied: 'bg-rose-100 text-rose-700',
+    reserved: 'bg-blue-100 text-blue-800',
+    cleaning: 'bg-amber-100 text-amber-800'
   };
 
   return (
