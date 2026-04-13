@@ -1,6 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { Roles } from '../auth/auth.decorators';
+import { UserRole } from '../common/types';
 import { RestaurantDataService } from '../data/restaurant-data.service';
+import { CreateStaffDto } from './dto/create-staff.dto';
 
 @Controller('staff')
 export class StaffController {
@@ -10,5 +12,14 @@ export class StaffController {
   @Get()
   findAll() {
     return this.restaurantDataService.getPublicUsers();
+  }
+
+  @Roles('super_admin', 'admin')
+  @Post()
+  create(
+    @Req() request: { user: { id: string; role: UserRole } },
+    @Body() payload: CreateStaffDto
+  ) {
+    return this.restaurantDataService.createStaff(request.user, payload);
   }
 }
