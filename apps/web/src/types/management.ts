@@ -1,4 +1,4 @@
-export type UserRole = 'super_admin' | 'admin' | 'server' | 'chef';
+export type UserRole = 'super_admin' | 'admin' | 'server' | 'chef' | 'cashier';
 export type ReservationStatus = 'pending' | 'confirmed' | 'seated' | 'completed' | 'cancelled';
 export type OrderStatus =
   | 'draft'
@@ -8,12 +8,14 @@ export type OrderStatus =
   | 'served'
   | 'closed';
 export type PaymentMethod = 'cash' | 'card' | 'mobile_money';
+export type TableStatus = 'available' | 'occupied' | 'reserved' | 'cleaning';
 
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
   role: UserRole;
+  active: boolean;
 }
 
 export interface LoginResponse {
@@ -23,12 +25,15 @@ export interface LoginResponse {
 
 export interface DashboardSummary {
   staffCount: number;
+  activeStaff: number;
   reservationCount: number;
   pendingReservations: number;
   activeKitchenTickets: number;
   openOrders: number;
   revenue: number;
   averageTicket: number;
+  tables: Record<TableStatus, number>;
+  roleBreakdown: Record<UserRole, number>;
 }
 
 export interface MenuItem {
@@ -46,6 +51,16 @@ export interface MenuCategory {
   items: MenuItem[];
 }
 
+export interface RestaurantTable {
+  id: string;
+  label: string;
+  zone: string;
+  seats: number;
+  status: TableStatus;
+  activeOrderId?: string;
+  activeReservationId?: string;
+}
+
 export interface Reservation {
   id: string;
   guestName: string;
@@ -56,6 +71,7 @@ export interface Reservation {
   notes?: string;
   status: ReservationStatus;
   source: 'website' | 'staff';
+  tableId?: string;
 }
 
 export interface OrderItem {
@@ -67,6 +83,7 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
+  tableId: string;
   tableLabel: string;
   customerName: string;
   createdAt: string;
