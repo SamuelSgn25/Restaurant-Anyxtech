@@ -9,7 +9,7 @@ export class AuthService {
   login(email: string, password: string) {
     const user = this.restaurantDataService
       .getUsers()
-      .find((entry) => entry.email === email && entry.password === password);
+      .find((entry) => entry.email === email && entry.password === password && entry.active);
 
     if (!user) {
       throw new UnauthorizedException('Identifiants invalides');
@@ -27,7 +27,7 @@ export class AuthService {
       const [userId, role] = decoded.split(':');
       const user = this.restaurantDataService
         .getUsers()
-        .find((entry) => entry.id === userId && entry.role === role);
+        .find((entry) => entry.id === userId && entry.role === role && entry.active);
 
       if (!user) {
         throw new UnauthorizedException('Session invalide');
