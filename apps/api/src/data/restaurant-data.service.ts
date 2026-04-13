@@ -3,44 +3,82 @@ import {
   MenuItemRecord,
   OrderRecord,
   OrderStatus,
-  PaymentMethod,
   PaymentRecord,
   PaymentStatus,
   ReservationRecord,
   ReservationStatus,
-  StaffUser
+  RestaurantTableRecord,
+  StaffUser,
+  TableStatus,
+  UserRole
 } from '../common/types';
 
 @Injectable()
 export class RestaurantDataService {
   private readonly users: StaffUser[] = [
     {
-      id: 'usr-super-admin',
-      name: 'Direction Generale',
+      id: 'usr-super-admin-1',
+      name: 'Direction Generale A',
       email: 'superadmin@cactus.bj',
       password: 'SuperAdmin123!',
-      role: 'super_admin'
+      role: 'super_admin',
+      active: true
     },
     {
-      id: 'usr-admin',
-      name: 'Gerant Restaurant',
+      id: 'usr-super-admin-2',
+      name: 'Direction Generale B',
+      email: 'superadmin2@cactus.bj',
+      password: 'SuperAdmin456!',
+      role: 'super_admin',
+      active: true
+    },
+    {
+      id: 'usr-admin-1',
+      name: 'Gerant Restaurant Matin',
       email: 'admin@cactus.bj',
       password: 'Admin123!',
-      role: 'admin'
+      role: 'admin',
+      active: true
     },
     {
-      id: 'usr-server',
+      id: 'usr-admin-2',
+      name: 'Gerante Restaurant Soir',
+      email: 'admin2@cactus.bj',
+      password: 'Admin456!',
+      role: 'admin',
+      active: true
+    },
+    {
+      id: 'usr-server-1',
       name: 'Serveur Principal',
       email: 'server@cactus.bj',
       password: 'Server123!',
-      role: 'server'
+      role: 'server',
+      active: true
     },
     {
-      id: 'usr-chef',
+      id: 'usr-server-2',
+      name: 'Serveuse Terrasse',
+      email: 'server2@cactus.bj',
+      password: 'Server456!',
+      role: 'server',
+      active: true
+    },
+    {
+      id: 'usr-chef-1',
       name: 'Chef de Cuisine',
       email: 'chef@cactus.bj',
       password: 'Chef123!',
-      role: 'chef'
+      role: 'chef',
+      active: true
+    },
+    {
+      id: 'usr-cashier-1',
+      name: 'Caissiere Principale',
+      email: 'cashier@cactus.bj',
+      password: 'Cashier123!',
+      role: 'cashier',
+      active: true
     }
   ];
 
@@ -92,6 +130,17 @@ export class RestaurantDataService {
     }
   ];
 
+  private tables: RestaurantTableRecord[] = [
+    { id: 'tbl-1', label: 'Table 01', zone: 'Salle principale', seats: 2, status: 'available' },
+    { id: 'tbl-2', label: 'Table 02', zone: 'Salle principale', seats: 4, status: 'reserved', activeReservationId: 'res-101' },
+    { id: 'tbl-3', label: 'Table 03', zone: 'Terrasse', seats: 4, status: 'available' },
+    { id: 'tbl-4', label: 'Table 04', zone: 'Terrasse', seats: 6, status: 'occupied', activeOrderId: 'ord-301' },
+    { id: 'tbl-5', label: 'Table 05', zone: 'Salon prive', seats: 8, status: 'cleaning' },
+    { id: 'tbl-6', label: 'Table 06', zone: 'Salle principale', seats: 2, status: 'available' },
+    { id: 'tbl-7', label: 'Table 07', zone: 'Terrasse', seats: 4, status: 'occupied', activeOrderId: 'ord-302' },
+    { id: 'tbl-8', label: 'Table 08', zone: 'Salon prive', seats: 10, status: 'available' }
+  ];
+
   private reservations: ReservationRecord[] = [
     {
       id: 'res-101',
@@ -102,7 +151,8 @@ export class RestaurantDataService {
       date: '2026-04-10T19:30:00.000Z',
       notes: 'Anniversaire discret',
       status: 'confirmed',
-      source: 'website'
+      source: 'website',
+      tableId: 'tbl-2'
     },
     {
       id: 'res-102',
@@ -119,10 +169,11 @@ export class RestaurantDataService {
   private orders: OrderRecord[] = [
     {
       id: 'ord-301',
+      tableId: 'tbl-4',
       tableLabel: 'Table 04',
       customerName: 'Mme Houessou',
-      createdAt: '2026-04-09T18:05:00.000Z',
-      serverId: 'usr-server',
+      createdAt: '2026-04-10T18:05:00.000Z',
+      serverId: 'usr-server-1',
       status: 'sent_to_kitchen',
       items: [
         {
@@ -142,10 +193,11 @@ export class RestaurantDataService {
     },
     {
       id: 'ord-302',
+      tableId: 'tbl-7',
       tableLabel: 'Table 07',
       customerName: 'M. Moreau',
-      createdAt: '2026-04-09T18:20:00.000Z',
-      serverId: 'usr-server',
+      createdAt: '2026-04-10T18:20:00.000Z',
+      serverId: 'usr-server-2',
       status: 'ready',
       items: [
         {
@@ -165,8 +217,8 @@ export class RestaurantDataService {
       amount: 9500,
       method: 'card',
       status: 'paid',
-      processedBy: 'usr-admin',
-      createdAt: '2026-04-09T18:45:00.000Z'
+      processedBy: 'usr-cashier-1',
+      createdAt: '2026-04-10T18:45:00.000Z'
     }
   ];
 
@@ -176,6 +228,22 @@ export class RestaurantDataService {
 
   getPublicUsers() {
     return this.users.map(({ password, ...user }) => user);
+  }
+
+  getRoleBreakdown() {
+    return this.users.reduce<Record<UserRole, number>>(
+      (acc, user) => {
+        acc[user.role] += 1;
+        return acc;
+      },
+      {
+        super_admin: 0,
+        admin: 0,
+        server: 0,
+        chef: 0,
+        cashier: 0
+      }
+    );
   }
 
   getMenuItems() {
@@ -207,6 +275,20 @@ export class RestaurantDataService {
     return item;
   }
 
+  getTables() {
+    return this.tables;
+  }
+
+  updateTableStatus(id: string, status: TableStatus) {
+    const table = this.findTable(id);
+    table.status = status;
+    if (status === 'available') {
+      table.activeOrderId = undefined;
+      table.activeReservationId = undefined;
+    }
+    return table;
+  }
+
   getReservations() {
     return this.reservations;
   }
@@ -219,6 +301,13 @@ export class RestaurantDataService {
     };
 
     this.reservations = [reservation, ...this.reservations];
+
+    if (reservation.tableId) {
+      const table = this.findTable(reservation.tableId);
+      table.status = 'reserved';
+      table.activeReservationId = reservation.id;
+    }
+
     return reservation;
   }
 
@@ -230,6 +319,23 @@ export class RestaurantDataService {
     }
 
     reservation.status = status;
+
+    if (reservation.tableId) {
+      const table = this.findTable(reservation.tableId);
+      if (status === 'confirmed') {
+        table.status = 'reserved';
+        table.activeReservationId = reservation.id;
+      }
+      if (status === 'seated') {
+        table.status = 'occupied';
+        table.activeReservationId = reservation.id;
+      }
+      if (status === 'completed' || status === 'cancelled') {
+        table.status = 'available';
+        table.activeReservationId = undefined;
+      }
+    }
+
     return reservation;
   }
 
@@ -241,13 +347,17 @@ export class RestaurantDataService {
   }
 
   createOrder(payload: Omit<OrderRecord, 'id' | 'createdAt' | 'status'>) {
+    const table = this.findTable(payload.tableId);
     const order: OrderRecord = {
       id: `ord-${Date.now()}`,
       createdAt: new Date().toISOString(),
       status: 'draft',
-      ...payload
+      ...payload,
+      tableLabel: table.label
     };
 
+    table.status = 'occupied';
+    table.activeOrderId = order.id;
     this.orders = [order, ...this.orders];
     return {
       ...order,
@@ -263,6 +373,16 @@ export class RestaurantDataService {
     }
 
     order.status = status;
+    const table = this.findTable(order.tableId);
+
+    if (status === 'closed') {
+      table.status = 'cleaning';
+      table.activeOrderId = undefined;
+    } else {
+      table.status = 'occupied';
+      table.activeOrderId = order.id;
+    }
+
     return {
       ...order,
       total: this.computeOrderTotal(order)
@@ -296,6 +416,18 @@ export class RestaurantDataService {
     const revenue = this.payments
       .filter((payment) => payment.status === 'paid')
       .reduce((sum, payment) => sum + payment.amount, 0);
+    const tableSummary = this.tables.reduce<Record<TableStatus, number>>(
+      (acc, table) => {
+        acc[table.status] += 1;
+        return acc;
+      },
+      {
+        available: 0,
+        occupied: 0,
+        reserved: 0,
+        cleaning: 0
+      }
+    );
 
     return {
       staffCount: this.users.length,
@@ -307,8 +439,21 @@ export class RestaurantDataService {
       averageTicket:
         orders.length === 0
           ? 0
-          : Math.round(orders.reduce((sum, order) => sum + order.total, 0) / orders.length)
+          : Math.round(orders.reduce((sum, order) => sum + order.total, 0) / orders.length),
+      tables: tableSummary,
+      roleBreakdown: this.getRoleBreakdown(),
+      activeStaff: this.users.filter((user) => user.active).length
     };
+  }
+
+  private findTable(id: string) {
+    const table = this.tables.find((entry) => entry.id === id);
+
+    if (!table) {
+      throw new NotFoundException('Table introuvable');
+    }
+
+    return table;
   }
 
   private computeOrderTotal(order: OrderRecord) {
