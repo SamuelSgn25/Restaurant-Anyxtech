@@ -10,6 +10,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -33,21 +34,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
-  async function login(email: string, password: string) {
-    const result = await api.login(email, password);
-    setToken(result.accessToken);
-    setUser(result.user);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ token: result.accessToken, user: result.user }));
-  }
+  function persist(nextToken: string | null, nextUser: AuthUser | null) {
+    setToken(nextToken);
+    setUser(nextUser);
 
-  function logout() {
-    setToken(null);
-    setUser(null);
+    if (nextToken && nextUser) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ token: nextToken, user: nextUser }));
+      return;
+    }
+
     localStorage.removeItem(STORAGE_KEY);
   }
 
+  async function login(email: string, password: string) {
+    const result = await api.login(email, password);
+    persist(result.accessToken, result.user);
+  }
+
+  async function refreshUser() {
+    if (!token) {
+      return;
+    }
+
+    const freshUser = await api.me(token);
+    persist(token, freshUser);
+  }
+
+  function logout() {
+    persist(null, null);
+  }
+
   return (
-    <AuthContext.Provider value={{ token, user, loading, login, logout }}>
+    <AuthContext.Provider value={{ token, user, loading, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
