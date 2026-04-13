@@ -5,7 +5,9 @@ import {
   MenuCategory,
   Order,
   Payment,
-  Reservation
+  Reservation,
+  RestaurantTable,
+  TableStatus
 } from '../types/management';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001/api';
@@ -50,6 +52,15 @@ export const api = {
       body: JSON.stringify({ available })
     }, token);
   },
+  tables(token: string) {
+    return request<RestaurantTable[]>('/tables', undefined, token);
+  },
+  updateTableStatus(id: string, status: TableStatus, token: string) {
+    return request<RestaurantTable>(`/tables/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status })
+    }, token);
+  },
   reservations(token: string) {
     return request<Reservation[]>('/reservations', undefined, token);
   },
@@ -60,6 +71,7 @@ export const api = {
     guests: number;
     date: string;
     notes?: string;
+    tableId?: string;
   }) {
     return request<Reservation>('/reservations', {
       method: 'POST',
@@ -76,6 +88,7 @@ export const api = {
     return request<Order[]>('/orders', undefined, token);
   },
   createOrder(payload: {
+    tableId: string;
     tableLabel: string;
     customerName: string;
     serverId: string;
