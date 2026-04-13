@@ -27,6 +27,9 @@ class CreateOrderItemDto {
 
 export class CreateOrderDto {
   @IsString()
+  tableId!: string;
+
+  @IsString()
   tableLabel!: string;
 
   @IsString()
