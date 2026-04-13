@@ -7,13 +7,13 @@ import { PaymentsService } from './payments.service';
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @Roles('super_admin', 'admin')
+  @Roles('super_admin', 'admin', 'cashier')
   @Get()
   findAll() {
     return this.paymentsService.findAll();
   }
 
-  @Roles('super_admin', 'admin')
+  @Roles('super_admin', 'admin', 'cashier')
   @Post()
   create(@Body() payload: CreatePaymentDto) {
     return this.paymentsService.create(payload);
