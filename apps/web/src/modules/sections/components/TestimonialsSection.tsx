@@ -16,7 +16,7 @@ export function TestimonialsSection({
           <article key={item.author} className="surface-card p-8">
             <p className="font-display text-3xl leading-10 text-forest">"{item.quote}"</p>
             <p className="mt-5 text-sm font-semibold text-clay">{item.author}</p>
-            <p className="text-sm text-ink/60">{item.role}</p>
+            <p className="text-sm text-ink/80">{item.role}</p>
           </article>
         ))}
       </div>

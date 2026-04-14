@@ -11,7 +11,7 @@ export function StorySection({ section }: { section: StorySectionType }) {
       <div className="surface-card p-8 sm:p-10">
         <p className="eyebrow">{section.eyebrow}</p>
         <h2 className="section-title mt-3 text-3xl sm:text-4xl">{section.title}</h2>
-        <div className="mt-6 space-y-4 text-base leading-8 text-ink/75">
+        <div className="mt-6 space-y-4 text-base leading-8 text-ink/90">
           {section.paragraphs.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}

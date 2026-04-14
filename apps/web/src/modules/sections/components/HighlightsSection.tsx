@@ -16,7 +16,7 @@ export function HighlightsSection({ section }: { section: HighlightsSectionType 
                 <Icon size={26} />
               </div>
               <h3 className="font-display text-2xl text-forest">{item.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-ink/70">{item.description}</p>
+              <p className="mt-3 text-sm leading-7 text-ink/80">{item.description}</p>
             </article>
           );
         })}

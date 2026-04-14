@@ -9,7 +9,7 @@ export function HeroSection({ section }: { section: HeroSectionType }) {
         <div className="space-y-4">
           <p className="eyebrow">{section.eyebrow}</p>
           <h1 className="section-title max-w-3xl">{section.title}</h1>
-          <p className="max-w-2xl text-lg leading-8 text-ink/75">{section.description}</p>
+          <p className="max-w-2xl text-lg leading-8 text-ink/85">{section.description}</p>
         </div>
 
         <div className="flex flex-wrap gap-4">
