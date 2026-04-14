@@ -38,7 +38,7 @@ export interface MenuItem {
   name: string;
   description: string;
   price: number;
-  available: boolean;
+  available: boolean; image?: string;
   tags: string[];
   createdBy?: string;
 }
@@ -128,7 +128,7 @@ export interface CreateMenuItemPayload {
   name: string;
   description: string;
   price: number;
-  available?: boolean;
+  available?: boolean; image?: string;
   tags?: string[];
 }
 
