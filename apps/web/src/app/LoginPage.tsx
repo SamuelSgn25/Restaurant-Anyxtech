@@ -3,14 +3,6 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from './AuthContext';
 
-const demoAccounts = [
-  { role: 'Super admin', email: 'superadmin@cactus.bj', password: 'SuperAdmin123!' },
-  { role: 'Administrateur', email: 'admin@cactus.bj', password: 'Admin123!' },
-  { role: 'Serveur', email: 'server@cactus.bj', password: 'Server123!' },
-  { role: 'Chef de cuisine', email: 'chef@cactus.bj', password: 'Chef123!' },
-  { role: 'Caissier', email: 'cashier@cactus.bj', password: 'Cashier123!' }
-];
-
 export function LoginPage() {
   const { login, user } = useAuth();
   const navigate = useNavigate();
@@ -58,10 +50,14 @@ export function LoginPage() {
       <div className="section-shell relative grid gap-8 lg:grid-cols-[1.08fr_0.92fr]">
         <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 p-8 text-white shadow-2xl backdrop-blur-xl sm:p-10">
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-gold via-white/80 to-clay" />
-          <p className="eyebrow !text-gold/80">Back office premium</p>
-          <h1 className="mt-4 max-w-2xl font-display text-5xl leading-tight sm:text-6xl">Une connexion haut de gamme pour piloter le restaurant.</h1>
-          <p className="mt-5 max-w-2xl text-base leading-8 text-white/74">Direction, salle, cuisine et caisse accedent ici a une experience plus executive, avec un niveau visuel digne d un logiciel de gestion premium.</p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">{demoAccounts.map((account) => <button key={account.email} type="button" onClick={() => { setEmail(account.email); setPassword(account.password); setCurrentPassword(account.password); setError(null); setSuccess(null); }} className="rounded-[1.6rem] border border-white/10 bg-white/10 p-4 text-left transition hover:bg-white/15"><p className="font-semibold">{account.role}</p><p className="mt-2 text-sm text-white/72">{account.email}</p></button>)}</div>
+          <h1 className="font-display text-4xl text-white">Gestion Restaurant</h1>
+          <p className="mt-4 text-lg text-white/72">Connectez-vous pour accéder au tableau de bord.</p>
+          <div className="mt-8 flex gap-4">
+            <a href="/" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+              Retour au site
+            </a>
+          </div>
         </section>
 
         <section className="rounded-[2.5rem] border border-forest/10 bg-white/90 p-8 shadow-card backdrop-blur sm:p-10">
