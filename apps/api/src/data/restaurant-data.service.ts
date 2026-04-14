@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
+import { EventsGateway } from '../events/events.gateway';
 import {
   MenuItemRecord,
   NotificationRecord,
@@ -66,6 +67,11 @@ export class RestaurantDataService {
     { id: 'notif-3', type: 'payment', title: 'Paiement recu', message: 'La commande ord-302 a ete encaissee.', createdAt: '2026-04-13T18:45:00.000Z', read: true }
   ];
 
+  constructor(
+    @Inject(forwardRef(() => EventsGateway))
+    private readonly eventsGateway: EventsGateway
+  ) {}
+
   getUsers() { return this.users; }
   getPublicUsers() { return this.users.map(({ password, ...user }) => user); }
 
@@ -73,6 +79,16 @@ export class RestaurantDataService {
     const user = this.users.find((entry) => entry.id === id);
     if (!user) throw new NotFoundException('Utilisateur introuvable');
     return user;
+  }
+
+  updateUser(id: string, payload: Partial<StaffUser>) {
+    const user = this.getUserById(id);
+    if (payload.name) user.name = payload.name;
+    if (payload.email) user.email = payload.email;
+    if (payload.role) user.role = payload.role;
+    this.pushNotification('staff', 'Profil modifie', `${user.name} a mis a jour son profil.`);
+    const { password, ...safeUser } = user;
+    return safeUser;
   }
 
   updateUserPassword(userId: string, currentPassword: string, newPassword: string) {
@@ -314,7 +330,10 @@ export class RestaurantDataService {
   }
 
   private pushNotification(type: NotificationRecord['type'], title: string, message: string) {
-    this.notifications.unshift({ id: `notif-${Date.now()}-${Math.round(Math.random() * 1000)}`, type, title, message, createdAt: new Date().toISOString(), read: false });
+    const notification = { id: `notif-${Date.now()}-${Math.round(Math.random() * 1000)}`, type, title, message, createdAt: new Date().toISOString(), read: false };
+    this.notifications.unshift(notification);
+    this.eventsGateway.broadcast('notification', notification);
+    this.eventsGateway.broadcast('refresh_dashboard', {});
   }
 
   private computeOrderTotal(order: OrderRecord) { return order.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0); }
