@@ -3,7 +3,6 @@ import { SectionRenderer } from '../modules/sections/SectionRenderer';
 import { siteContent } from '../content/site-content';
 import { api } from '../lib/api';
 import { RestaurantTable } from '../types/management';
-import { StatusBadge } from '../components/management/StatusBadge';
 
 export function PublicReservationPage() {
   const page = siteContent.pages.find((entry) => entry.slug === '/reservation');
@@ -33,37 +32,55 @@ export function PublicReservationPage() {
   return (
     <main>
       {page?.sections.map((section, index) => <SectionRenderer key={`${section.type}-${index}`} section={section} />)}
-      <section className="section-shell grid gap-6 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:py-16">
-        <form className="surface-card p-8 sm:p-10" onSubmit={handleSubmit}>
-          <p className="eyebrow">Reservation en ligne</p>
-          <h2 className="mt-3 font-display text-4xl text-forest">Un formulaire clair pour reserver votre table</h2>
-          <p className="mt-3 max-w-2xl text-base leading-8 text-ink/65">Choisissez votre moment, le nombre de couverts et la zone souhaitee. La demande arrive directement dans le dashboard du restaurant.</p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <input value={form.guestName} onChange={(event) => setForm({ ...form, guestName: event.target.value })} className="rounded-[1.2rem] border border-forest/15 px-4 py-3" placeholder="Nom complet" required />
-            <input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="rounded-[1.2rem] border border-forest/15 px-4 py-3" placeholder="Telephone" required />
-            <input value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="rounded-[1.2rem] border border-forest/15 px-4 py-3" placeholder="Email" type="email" required />
-            <input value={form.guests} onChange={(event) => setForm({ ...form, guests: Number(event.target.value) })} className="rounded-[1.2rem] border border-forest/15 px-4 py-3" type="number" min="1" max="20" required />
-            <input value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} className="rounded-[1.2rem] border border-forest/15 px-4 py-3 sm:col-span-2" type="datetime-local" required />
-            <select value={form.preferredZone} onChange={(event) => setForm({ ...form, preferredZone: event.target.value })} className="rounded-[1.2rem] border border-forest/15 px-4 py-3 sm:col-span-2">
-              {zones.map((zone) => <option key={zone} value={zone}>{zone}</option>)}
-            </select>
-            <textarea value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} className="min-h-32 rounded-[1.2rem] border border-forest/15 px-4 py-3 sm:col-span-2" placeholder="Allergies, occasion speciale, preference precise d emplacement..." />
-          </div>
-          {error ? <p className="mt-4 text-sm font-medium text-rose-700">{error}</p> : null}
-          {success ? <p className="mt-4 text-sm font-medium text-emerald-700">{success}</p> : null}
-          <button type="submit" disabled={submitting} className="mt-5 rounded-full bg-forest px-6 py-3 text-sm font-semibold text-white transition hover:bg-ink disabled:opacity-70">{submitting ? 'Envoi...' : 'Envoyer ma reservation'}</button>
-        </form>
-
-        <div className="space-y-6">
-          <section className="surface-card p-8">
-            <p className="eyebrow">Plan visuel des zones</p>
-            <h2 className="mt-3 font-display text-4xl text-forest">Choisissez l ambiance qui vous convient</h2>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">{zones.map((zone) => <button key={zone} type="button" onClick={() => setForm({ ...form, preferredZone: zone })} className={['rounded-[1.5rem] border p-4 text-left transition', form.preferredZone === zone ? 'border-clay bg-clay/10' : 'border-forest/10 hover:border-clay/40'].join(' ')}><p className="font-semibold text-forest">{zone}</p><p className="mt-2 text-sm text-ink/60">{tables.filter((table) => table.zone === zone).length} tables visibles</p></button>)}</div>
-          </section>
-          <section className="surface-card p-8">
-            <p className="eyebrow">Disponibilites</p>
-            <div className="mt-5 space-y-3">{tables.map((table) => <article key={table.id} className="rounded-[1.3rem] border border-forest/10 p-4"><div className="flex items-center justify-between gap-3"><div><p className="font-semibold text-forest">{table.label}</p><p className="mt-1 text-sm text-ink/60">{table.zone} ∑ {table.seats} couverts</p></div><StatusBadge value={table.status} /></div></article>)}</div>
-          </section>
+      <section className="section-shell py-10 lg:py-16">
+        <div className="mx-auto max-w-4xl">
+          <form className="surface-card p-8 sm:p-10" onSubmit={handleSubmit}>
+            <p className="eyebrow">Reservation</p>
+            <h1 className="mt-3 font-display text-4xl text-forest sm:text-5xl">Cette page prepare le terrain pour brancher ensuite une API de disponibilite, une caisse, ou un CRM restaurant.</h1>
+            <p className="mt-6 text-lg leading-8 text-ink/65">Indiquez vos coordonnees et preferences ci-dessous. Notre equipe vous contactera pour confirmer votre table selon nos disponibilites en temps r√©el.</p>
+            
+            <div className="mt-10 grid gap-6 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-forest">Nom complet</label>
+                <input value={form.guestName} onChange={(event) => setForm({ ...form, guestName: event.target.value })} className="w-full rounded-[1.2rem] border border-forest/15 px-4 py-3 focus:border-clay focus:ring-1 focus:ring-clay" placeholder="Ex: Jean Dupont" required />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-forest">Telephone</label>
+                <input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="w-full rounded-[1.2rem] border border-forest/15 px-4 py-3 focus:border-clay focus:ring-1 focus:ring-clay" placeholder="+229 ..." required />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-forest">Email</label>
+                <input value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="w-full rounded-[1.2rem] border border-forest/15 px-4 py-3 focus:border-clay focus:ring-1 focus:ring-clay" placeholder="email@exemple.com" type="email" required />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-forest">Nombre de couverts</label>
+                <input value={form.guests} onChange={(event) => setForm({ ...form, guests: Number(event.target.value) })} className="w-full rounded-[1.2rem] border border-forest/15 px-4 py-3 focus:border-clay focus:ring-1 focus:ring-clay" type="number" min="1" max="50" required />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-semibold text-forest">Date et heure souhaitees</label>
+                <input value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} className="w-full rounded-[1.2rem] border border-forest/15 px-4 py-3 focus:border-clay focus:ring-1 focus:ring-clay" type="datetime-local" required />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-semibold text-forest">Zone preferee</label>
+                <select value={form.preferredZone} onChange={(event) => setForm({ ...form, preferredZone: event.target.value })} className="w-full rounded-[1.2rem] border border-forest/15 px-4 py-3 focus:border-clay focus:ring-1 focus:ring-clay">
+                  {zones.length > 0 ? zones.map((zone) => <option key={zone} value={zone}>{zone}</option>) : <option value="Salle principale">Salle principale</option>}
+                  {!zones.includes('Terrasse') && <option value="Terrasse">Terrasse</option>}
+                  {!zones.includes('VIP') && <option value="VIP">VIP</option>}
+                </select>
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-semibold text-forest">Notes ou demandes particulieres</label>
+                <textarea value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} className="min-h-32 w-full rounded-[1.2rem] border border-forest/15 px-4 py-3 focus:border-clay focus:ring-1 focus:ring-clay" placeholder="Allergies, anniversaire, preference de table..." />
+              </div>
+            </div>
+            
+            {error ? <p className="mt-4 text-sm font-medium text-rose-700">{error}</p> : null}
+            {success ? <p className="mt-4 text-sm font-medium text-emerald-700">{success}</p> : null}
+            
+            <button type="submit" disabled={submitting} className="mt-10 w-full rounded-full bg-forest py-5 text-base font-bold text-white shadow-xl transition hover:bg-clay disabled:opacity-70">
+              {submitting ? 'Envoi en cours...' : 'Confirmer ma demande de reservation'}
+            </button>
+          </form>
         </div>
       </section>
     </main>
