@@ -194,6 +194,12 @@ export const api = {
   staff(token: string) {
     return request<AuthUser[]>('/staff', undefined, token);
   },
+  updateStaff(id: string, payload: Partial<CreateStaffPayload>, token: string) {
+    return request<AuthUser>(`/staff/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload)
+    }, token);
+  },
   createStaff(payload: CreateStaffPayload, token: string) {
     return request<AuthUser>('/staff', {
       method: 'POST',
