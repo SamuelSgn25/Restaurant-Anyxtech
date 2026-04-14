@@ -36,8 +36,8 @@ export function PublicReservationPage() {
         <div className="mx-auto max-w-4xl">
           <form className="surface-card p-8 sm:p-10" onSubmit={handleSubmit}>
             <p className="eyebrow">Reservation</p>
-            <h1 className="mt-3 font-display text-4xl text-forest sm:text-5xl">Cette page prepare le terrain pour brancher ensuite une API de disponibilite, une caisse, ou un CRM restaurant.</h1>
-            <p className="mt-6 text-lg leading-8 text-ink/65">Indiquez vos coordonnees et preferences ci-dessous. Notre equipe vous contactera pour confirmer votre table selon nos disponibilites en temps réel.</p>
+            <h2 className="mt-3 font-display text-4xl text-forest sm:text-5xl">Reserver Votre Moment</h2>
+            <p className="mt-6 text-lg leading-8 text-ink/65">Indiquez vos coordonnees et preferences ci-dessous. Notre equipe vous contactera rapidement pour confirmer votre table.</p>
             
             <div className="mt-10 grid gap-6 sm:grid-cols-2">
               <div className="space-y-2">
