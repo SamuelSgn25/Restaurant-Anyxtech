@@ -263,9 +263,9 @@ export const siteContent: SiteContent = {
         {
           type: 'reservation-cta',
           eyebrow: 'Service',
-          title: 'Menus groupes, afterwork et cartes saisonnieres',
+          title: 'Menus Groupes & Evenements',
           description:
-            'Le meme moteur de sections peut aussi servir pour des cartes evenementielles, sans dupliquer les composants.',
+            'Nous organisons vos evenements sur mesure, des diners d’affaires aux celebrations privees avec une carte dediee.',
           bullets: [
             'Carte midi',
             'Carte diner',
@@ -348,7 +348,7 @@ export const siteContent: SiteContent = {
           eyebrow: 'Contact rapide',
           title: 'Le point d entree ideal pour une future reservation connectee.',
           description:
-            'Cette page prepare le terrain pour brancher ensuite une API de disponibilite, une caisse, ou un CRM restaurant.',
+            'Reserver votre table en toute simplicite pour un moment d’exception.',
           primaryCta: { label: 'Appeler', href: 'tel:+2290100000000' },
           secondaryCta: { label: 'Envoyer un email', href: 'mailto:restaurant@lecactushotel.bj' },
           stats: [
@@ -362,13 +362,13 @@ export const siteContent: SiteContent = {
         {
           type: 'reservation-cta',
           eyebrow: 'Comment ca marche',
-          title: 'Une structure deja prete pour evoluer',
+          title: 'Un espace pense pour vous',
           description:
-            'Aujourd hui: vitrine premium. Demain: moteur de reservations, formulaires avances, gestion de creneaux et synchronisation POS.',
+            'Notre restaurant offre differentes ambiances pour satisfaire toutes vos envies, du dejeuner d’affaires au diner romantique.',
           bullets: [
-            'Coordonnees claires',
-            'Flux extensible',
-            'Architecture decouplee'
+            'Confirmation rapide',
+            'Service de qualite',
+            'Accueil chaleureux'
           ]
         },
         {
