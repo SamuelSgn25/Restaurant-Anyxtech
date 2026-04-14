@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import {
   AuthUser,
@@ -88,7 +89,8 @@ export function ManagementPage() {
     if (!canView(user.role, activeView)) setActiveView('overview');
     
     loadData();
-    const interval = setInterval(loadData, 10000); // Polling every 10s for real-time
+    loadData();
+    const interval = setInterval(loadData, 3000); // Polling every 3s for pseudo real-time
     return () => clearInterval(interval);
   }, [token, user]);
 
@@ -101,7 +103,7 @@ export function ManagementPage() {
   async function loadData() {
     if (!token || !user) return;
     try {
-      const [dash, menuData, tableData, reservationData, orderData, kitchenData, paymentData, staffData, notificationData] = await Promise.all([
+      const payloads = [
         api.dashboard(token),
         api.menu(),
         api.tables(token),
@@ -111,9 +113,38 @@ export function ManagementPage() {
         canView(user.role, 'cashier') ? api.payments(token) : Promise.resolve([]),
         canView(user.role, 'team') ? api.staff(token) : Promise.resolve([]),
         api.notifications(token)
-      ]);
-      setSummary(dash); setMenu(menuData); setTables(tableData); setReservations(reservationData); setOrders(orderData); setKitchenTickets(kitchenData); setPayments(paymentData); setStaff(staffData); setNotifications(notificationData);
-    } catch (e) {}
+      ];
+
+      const results = await Promise.allSettled(payloads);
+      
+      // Map results safely
+      const dash = results[0].status === 'fulfilled' ? results[0].value as DashboardSummary : null;
+      const menuData = results[1].status === 'fulfilled' ? results[1].value as MenuCategory[] : [];
+      const tableData = results[2].status === 'fulfilled' ? results[2].value as RestaurantTable[] : [];
+      const reservationData = results[3].status === 'fulfilled' ? results[3].value as Reservation[] : [];
+      const orderData = results[4].status === 'fulfilled' ? results[4].value as Order[] : [];
+      const kitchenData = results[5].status === 'fulfilled' ? results[5].value as Order[] : [];
+      const paymentData = results[6].status === 'fulfilled' ? results[6].value as Payment[] : [];
+      const staffData = results[7].status === 'fulfilled' ? results[7].value as AuthUser[] : [];
+      const notificationData = results[8].status === 'fulfilled' ? results[8].value as NotificationItem[] : [];
+
+      if (results.some(r => r.status === 'rejected')) {
+        console.error('Certaines donnees n ont pas pu etre chargees:', results.filter(r => r.status === 'rejected'));
+      }
+
+      setSummary(dash);
+      setMenu(menuData);
+      setTables(tableData);
+      setReservations(reservationData);
+      setOrders(orderData);
+      setKitchenTickets(kitchenData);
+      setPayments(paymentData);
+      setStaff(staffData);
+      setNotifications(notificationData);
+    } catch (e) {
+      console.error('Erreur critique de chargement:', e);
+      setFlash({ type: 'error', text: 'Impossible de charger les donnees.' });
+    }
   }
 
   async function act(task: () => Promise<void>, success: string) {
@@ -128,8 +159,8 @@ export function ManagementPage() {
   async function handleProfileUpdate(e: FormEvent) {
     e.preventDefault();
     await act(async () => {
-      // Assuming api.updateProfile exists or we reuse staff update
-      await api.changePassword({ currentPassword: '', newPassword: '' }, authToken); // Placeholder
+      // We'll update the staff account directly since there is no separate profile update yet
+      await api.updateStaff(user.id, { name: profileForm.name }, authToken); 
       await refreshUser();
     }, 'Profil mis a jour.');
   }
@@ -171,6 +202,9 @@ export function ManagementPage() {
               <h1 className="mt-2 font-display text-4xl sm:text-5xl">Tableau de Bord</h1>
             </div>
             <div className="flex items-center gap-4">
+              <Link to="/" className="hidden lg:flex items-center gap-1 rounded-full border border-white/20 px-4 py-2 text-xs font-bold text-white transition hover:bg-white/10 uppercase tracking-widest">
+                Accueil Site
+              </Link>
               <NotificationCenter notifications={notifications} open={notifOpen} onToggle={() => { setNotifOpen(!notifOpen); setAccountOpen(false); }} onRead={(id) => api.markNotificationRead(id, authToken)} />
               <AccountMenu user={user} open={accountOpen} onToggle={() => { setAccountOpen(!accountOpen); setNotifOpen(false); }} onSelect={(v) => { setUtilityView(v); setAccountOpen(false); }} onLogout={logout} />
             </div>
@@ -228,9 +262,9 @@ export function ManagementPage() {
                    </div>
                    <div className="space-y-2">
                      <label className="text-sm font-bold text-forest/60">Email</label>
-                     <input value={profileForm.email} readOnly className="w-full rounded-2xl border-forest/15 bg-slate-100 px-5 py-4 opacity-70" />
+                     <input value={profileForm.email} readOnly className="w-full rounded-2xl border-forest/15 bg-slate-100 px-5 py-4 opacity-70 cursor-not-allowed" />
                    </div>
-                   <button type="submit" className="rounded-full bg-forest px-8 py-4 font-bold text-white shadow-lg transition hover:bg-clay">Mettre a jour</button>
+                   <button type="submit" className="rounded-full bg-forest px-8 py-4 font-bold text-white shadow-lg transition hover:bg-clay hover:scale-105 active:scale-95">Mettre a jour</button>
                  </form>
                </article>
             )}
@@ -244,6 +278,7 @@ export function ManagementPage() {
                 onSelect={setSelectedTableId}
                 onReservationDrop={(rid, tid) => api.assignReservationTable(rid, tid, authToken).then(loadData)}
                 onOrderDrop={(oid, tid) => api.moveOrderTable(oid, tid, authToken).then(loadData)}
+                onStatusChange={(tid, status) => api.updateTableStatus(tid, status, authToken).then(loadData)}
                />
             )}
 
@@ -286,15 +321,26 @@ export function ManagementPage() {
                       <button type="submit" className="w-full rounded-full bg-forest py-4 font-bold text-white">Ajouter au menu</button>
                     </form>
                     
-                    <div className="mt-8 space-y-4">
+                    <div className="mt-8 grid gap-4 sm:grid-cols-2">
                       {menuItems.map(item => (
-                        <div key={item.id} className="flex items-center gap-4 rounded-2xl bg-sand/20 p-3">
-                          {item.image ? <img src={item.image} className="h-12 w-12 rounded-xl object-cover" /> : <div className="h-12 w-12 rounded-xl bg-forest/10 flex items-center justify-center"><Package size={20} className="text-forest/30" /></div>}
-                          <div className="flex-1">
-                            <p className="text-sm font-bold text-forest">{item.name}</p>
-                            <p className="text-xs text-ink/50">{money(item.price)}</p>
+                        <div key={item.id} className="surface-card flex items-center gap-4 p-4">
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-forest/5">
+                            {item.image ? (
+                              <img src={item.image} className="h-full w-full object-cover transition hover:scale-110" />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-forest/20">
+                                <Package size={24} />
+                              </div>
+                            )}
                           </div>
-                          <button onClick={() => api.updateMenuAvailability(item.id, !item.available, authToken).then(loadData)} className={['rounded-full px-3 py-1 text-[10px] font-bold', item.available ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'].join(' ')}>
+                          <div className="flex-1 min-w-0">
+                            <p className="truncate text-sm font-bold text-forest">{item.name}</p>
+                            <p className="text-xs font-bold text-clay">{money(item.price)}</p>
+                          </div>
+                          <button 
+                            onClick={() => api.updateMenuAvailability(item.id, !item.available, authToken).then(loadData)} 
+                            className={['rounded-full px-3 py-1.5 text-[10px] font-bold shadow-sm transition', item.available ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-rose-100 text-rose-700 hover:bg-rose-200'].join(' ')}
+                          >
                             {item.available ? 'Actif' : 'Epuise'}
                           </button>
                         </div>
