@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { Roles } from '../auth/auth.decorators';
 import { UserRole } from '../common/types';
 import { RestaurantDataService } from '../data/restaurant-data.service';
@@ -21,5 +21,14 @@ export class StaffController {
     @Body() payload: CreateStaffDto
   ) {
     return this.restaurantDataService.createStaff(request.user, payload);
+  }
+
+  @Roles('super_admin', 'admin', 'server', 'chef', 'cashier')
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() payload: any
+  ) {
+    return this.restaurantDataService.updateUser(id, payload);
   }
 }
