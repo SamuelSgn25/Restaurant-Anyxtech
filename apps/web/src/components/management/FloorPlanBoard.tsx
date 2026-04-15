@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { 
-  Users, Clock, User, ChevronRight, X, Plan, 
+  Users, Clock, User, ChevronRight, X, LayoutGrid, 
   MapPin, Maximize2, Move, Layout, CheckCircle2, 
   Trash2, Plus, Info, Sparkles 
 } from 'lucide-react';
