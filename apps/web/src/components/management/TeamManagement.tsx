@@ -16,11 +16,11 @@ interface TeamManagementProps {
 }
 
 const ROLES_INFO: { [key in UserRole]: { label: string; icon: any; color: string; description: string } } = {
-  super_admin: { label: 'Super Admin', icon: Crown, color: 'text-purple-600 bg-purple-100', description: 'Contrôle total du système' },
-  admin: { label: 'Admin', icon: Shield, color: 'text-blue-600 bg-blue-100', description: 'Gestion du restaurant' },
-  server: { label: 'Serveur', icon: Briefcase, color: 'text-emerald-600 bg-emerald-100', description: 'Service et réservations' },
-  chef: { label: 'Chef', icon: Utensils, color: 'text-orange-600 bg-orange-100', description: 'Cuisine et menu' },
-  cashier: { label: 'Caissier', icon: User, color: 'text-rose-600 bg-rose-100', description: 'Paiements et facturation' }
+  super_admin: { label: 'Super Admin', icon: Crown, color: 'text-forest bg-forest/5', description: 'Contrôle total du système' },
+  admin: { label: 'Admin', icon: Shield, color: 'text-forest/80 bg-forest/3', description: 'Gestion du restaurant' },
+  server: { label: 'Serveur', icon: Briefcase, color: 'text-clay bg-clay/10', description: 'Service et réservations' },
+  chef: { label: 'Chef', icon: Utensils, color: 'text-clay/80 bg-clay/5', description: 'Cuisine et menu' },
+  cashier: { label: 'Caissier', icon: User, color: 'text-gold bg-gold/10', description: 'Paiements et facturation' }
 };
 
 export function TeamManagement({
@@ -193,7 +193,7 @@ export function TeamManagement({
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
-                className="flex-1 py-3 rounded-xl bg-emerald-500 text-white font-bold uppercase tracking-widest hover:scale-105 transition-all"
+                className="flex-1 py-3 rounded-xl bg-clay text-white font-bold uppercase tracking-widest hover:scale-105 transition-all"
               >
                 ✓ Créer
               </button>
@@ -290,7 +290,7 @@ export function TeamManagement({
                       ))}
                     </select>
                     <div className="flex gap-2">
-                      <button type="submit" className="flex-1 py-2 rounded-lg bg-emerald-500 text-white font-bold text-xs">✓</button>
+                      <button type="submit" className="flex-1 py-2 rounded-lg bg-clay text-white font-bold text-xs">✓</button>
                       <button
                         type="button"
                         onClick={() => setEditingId(null)}
@@ -307,7 +307,7 @@ export function TeamManagement({
                       <div className={`p-3 rounded-xl ${roleInfo.color}`}>
                         <Icon size={20} />
                       </div>
-                      <div className={`px-2 py-1 rounded-full text-[10px] font-bold ${member.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>
+                      <div className={`px-2 py-1 rounded-full text-[10px] font-bold ${member.active ? 'bg-gold/20 text-gold' : 'bg-forest/10 text-forest/40'}`}>
                         {member.active ? '● Actif' : '● Inactif'}
                       </div>
                     </div>
@@ -357,7 +357,7 @@ export function TeamManagement({
                               onDeleteStaff(member.id);
                             }
                           }}
-                          className="w-full py-2 rounded-lg bg-rose-500/10 text-rose-600 font-bold text-xs hover:bg-rose-500/20 transition-all flex items-center justify-center gap-2"
+                          className="w-full py-2 rounded-lg bg-forest/10 text-forest/50 font-bold text-xs hover:bg-forest/20 transition-all flex items-center justify-center gap-2"
                         >
                           <Trash2 size={12} /> Supprimer
                         </button>
