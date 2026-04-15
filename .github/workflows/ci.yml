@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  test-and-build:
+  validate-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,10 +18,27 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Run tests
-        run: npm test
+      - name: Linting and Code Formatting Check
+        run: npm run lint --if-present
 
-      - name: Build workspaces
-        run: npm run build
+      - name: Code Type Check (TypeScript)
+        run: npx tsc --noEmit
+
+      - name: Run Unit Tests
+        run: npm test --if-present
+
+      - name: Build React Web App
+        run: npm run build --workspace=apps/web
+
+      - name: Build NestJS API
+        run: npm run build --workspace=apps/api
+        
+  docker-validation:
+    needs: validate-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Docker Compose Build
+        run: docker compose build
