@@ -1,4 +1,4 @@
-import { Bell, X, Check, Info, AlertTriangle, CreditCard, Utensils, Zap, Sparkles } from 'lucide-react';
+import { Bell, X, Check, Info, AlertTriangle, CreditCard, Utensils, Zap, Sparkles, Clock } from 'lucide-react';
 import { NotificationItem } from '../../types/management';
 
 function NotificationIcon({ type }: { type: NotificationItem['type'] }) {
