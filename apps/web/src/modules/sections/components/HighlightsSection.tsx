@@ -1,4 +1,4 @@
-import { HighlightsSection as HighlightsSectionType } from '../../../types/content';
+import { FeaturesSection as HighlightsSectionType } from '../../../types/content';
 
 export function HighlightsSection({ section }: { section: HighlightsSectionType }) {
   return (
