@@ -11,7 +11,7 @@ export function ReservationCtaSection({
         <div>
           <p className="eyebrow !text-gold/80">{section.eyebrow}</p>
           <h2 className="mt-3 font-display text-4xl sm:text-5xl">{section.title}</h2>
-          <p className="mt-4 max-w-2xl text-base leading-8 text-white/75">{section.description}</p>
+          <p className="mt-4 max-w-2xl text-lg font-medium leading-8 text-white">{section.description}</p>
         </div>
         <ul className="space-y-4 rounded-[1.5rem] bg-white/10 p-6">
           {section.bullets.map((bullet) => (
