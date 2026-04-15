@@ -14,7 +14,7 @@ export function SectionRenderer({ section }: { section: PageSection }) {
       return <HeroSection section={section} />;
     case 'story':
       return <StorySection section={section} />;
-    case 'highlights':
+    case 'features':
       return <HighlightsSection section={section} />;
     case 'menu-showcase':
       return <MenuShowcaseSection section={section} />;
