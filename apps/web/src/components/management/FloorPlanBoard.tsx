@@ -1,22 +1,21 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Order, Reservation, RestaurantTable, TableStatus } from '../../types/management';
-import { StatusBadge } from './StatusBadge';
-import { Clock, Users, ArrowRight, Settings, Plus, LayoutGrid, Info, Map as MapIcon, ChevronRight, X, User, Tag } from 'lucide-react';
+import { 
+  Users, Clock, User, ChevronRight, X, Plan, 
+  MapPin, Maximize2, Move, Layout, CheckCircle2, 
+  Trash2, Plus, Info, Sparkles 
+} from 'lucide-react';
+import { RestaurantTable, Reservation, Order, TableStatus } from '../../types/management';
 
-function getTableColor(status: TableStatus) {
-  switch (status) {
-    case 'available': return 'bg-emerald-500 border-emerald-400 text-white';
-    case 'occupied': return 'bg-rose-500 border-rose-400 text-white';
-    case 'reserved': return 'bg-orange-500 border-orange-400 text-white';
-    case 'cleaning': return 'bg-slate-400 border-slate-300 text-white';
-    default: return 'bg-slate-200 border-slate-300 text-ink';
-  }
-}
-
-function tableShapeClass(shape: RestaurantTable['shape']) {
-  if (shape === 'round') return 'rounded-full';
-  if (shape === 'booth') return 'rounded-3xl';
-  return 'rounded-2xl';
+interface FloorPlanProps {
+  tables: RestaurantTable[];
+  reservations: Reservation[];
+  orders: Order[];
+  selectedTableId: string | null;
+  onSelect: (id: string) => void;
+  onReservationDrop: (reservationId: string, tableId: string) => void;
+  onOrderDrop: (orderId: string, tableId: string) => void;
+  onStatusChange?: (tableId: string, status: TableStatus) => void;
+  onUpdateTablePosition?: (tableId: string, posX: number, posY: number) => void;
 }
 
 export function FloorPlanBoard({
@@ -27,297 +26,289 @@ export function FloorPlanBoard({
   onSelect,
   onReservationDrop,
   onOrderDrop,
-  onUpdateTablePosition,
-  onStatusChange
-}: {
-  tables: RestaurantTable[];
-  reservations: Reservation[];
-  orders: Order[];
-  selectedTableId: string | null;
-  onSelect: (tableId: string | null) => void;
-  onReservationDrop: (reservationId: string, tableId: string) => void;
-  onOrderDrop: (orderId: string, tableId: string) => void;
-  onUpdateTablePosition?: (tableId: string, posX: number, posY: number) => void;
-  onStatusChange?: (tableId: string, status: TableStatus) => void;
-}) {
-  const [activeZone, setActiveZone] = useState<string | null>(null);
+  onStatusChange,
+  onUpdateTablePosition
+}: FloorPlanProps) {
+  const [activeZone, setActiveZone] = useState('Salle principale');
   const [isEditMode, setIsEditMode] = useState(false);
   const [detailsModal, setDetailsModal] = useState<string | null>(null);
-  
-  const zones = useMemo(() => Array.from(new Set(tables.map((table) => table.zone))), [tables]);
-  const currentZone = activeZone || (zones.length > 0 ? zones[0] : null);
-  const filteredTables = tables.filter((table) => table.zone === currentZone);
 
-  const formatElapsedTime = (createdAt: string) => {
-    const start = new Date(createdAt).getTime();
-    const now = Date.now();
-    const diff = Math.floor((now - start) / 60000); // in minutes
-    if (diff < 60) return `${diff}m`;
-    return `${Math.floor(diff / 60)}h ${diff % 60}m`;
+  const zones = useMemo(() => Array.from(new Set(tables.map((t) => t.zone))), [tables]);
+  const filteredTables = useMemo(() => tables.filter((t) => t.zone === activeZone), [tables, activeZone]);
+
+  const getTableColor = (status: TableStatus) => {
+    switch (status) {
+      case 'available': return 'bg-emerald-100 border-emerald-500 text-emerald-900 ring-emerald-500/20';
+      case 'occupied': return 'bg-rose-100 border-rose-500 text-rose-900 ring-rose-500/20';
+      case 'reserved': return 'bg-orange-100 border-orange-500 text-orange-900 ring-orange-500/20';
+      case 'cleaning': return 'bg-slate-100 border-slate-400 text-slate-800 ring-slate-400/20';
+      default: return 'bg-sand border-forest/10';
+    }
   };
 
-  const selectedTable = useMemo(() => tables.find(t => t.id === detailsModal), [detailsModal, tables]);
-  const activeOrder = useMemo(() => orders.find(o => o.tableId === detailsModal), [detailsModal, orders]);
-  const activeReservation = useMemo(() => reservations.find(r => r.tableId === detailsModal), [detailsModal, reservations]);
+  const tableShapeClass = (shape: string) => {
+    switch (shape) {
+      case 'round': return 'rounded-full';
+      case 'square': return 'rounded-3xl';
+      default: return 'rounded-2xl';
+    }
+  };
+
+  const formatElapsedTime = (startIso: string) => {
+    const start = new Date(startIso).getTime();
+    const now = new Date().getTime();
+    const diff = Math.floor((now - start) / (1000 * 60));
+    return `${diff} min`;
+  };
+
+  const selectedTable = useMemo(() => tables.find((t) => t.id === detailsModal), [tables, detailsModal]);
+  const activeOrder = useMemo(() => orders.find((o) => o.tableId === detailsModal), [orders, detailsModal]);
+  const activeReservation = useMemo(() => reservations.find((r) => r.tableId === detailsModal), [reservations, detailsModal]);
 
   return (
-    <div className="flex h-[calc(100vh-14rem)] flex-col gap-6 lg:flex-row">
-      {/* Sidebar for Zones and Stats */}
-      <aside className="flex w-full flex-col gap-6 lg:w-[280px]">
-        <div className="surface-card p-6">
-          <p className="eyebrow mb-4">Zones du restaurant</p>
-          <div className="space-y-2">
-            {zones.map((zone) => (
-              <button
-                key={zone}
-                onClick={() => setActiveZone(zone)}
-                className={[
-                  'flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-all',
-                  currentZone === zone 
-                    ? 'bg-forest text-white shadow-lg' 
-                    : 'bg-sand/40 text-forest hover:bg-forest/5'
-                ].join(' ')}
-              >
-                <div className="flex items-center gap-2">
-                  <MapIcon size={16} />
-                  <span>{zone}</span>
-                </div>
-                <span className={['rounded-full px-2 py-0.5 text-[10px]', currentZone === zone ? 'bg-white/20' : 'bg-forest/10'].join(' ')}>
-                  {tables.filter(t => t.zone === zone).length}
-                </span>
-              </button>
-            ))}
-          </div>
+    <div className="relative flex flex-col h-full min-h-[700px] bg-white rounded-[2.5rem] border border-forest/5 shadow-xl overflow-hidden">
+      
+      {/* Upper Control Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between p-6 gap-4 border-b border-forest/5 bg-sand/20">
+        <div className="flex bg-white rounded-2xl p-1.5 shadow-sm border border-forest/5">
+          {(zones.length > 0 ? zones : ['Salle principale']).map((zone) => (
+            <button
+              key={zone}
+              onClick={() => setActiveZone(zone)}
+              className={['px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all', activeZone === zone ? 'bg-forest text-white shadow-md' : 'text-forest/40 hover:text-forest/60'].join(' ')}
+            >
+              {zone}
+            </button>
+          ))}
+        </div>
 
+        <div className="flex items-center gap-2">
           <button 
             onClick={() => setIsEditMode(!isEditMode)}
-            className={[
-              'mt-6 flex w-full items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-bold transition-all',
-              isEditMode 
-                ? 'bg-clay text-white border-clay shadow-lg pulse-animation' 
-                : 'bg-white text-forest border-forest/15 hover:border-forest/40'
-            ].join(' ')}
+            className={['flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-sm', isEditMode ? 'bg-clay text-white' : 'bg-white text-forest border border-forest/10 hover:bg-forest/5'].join(' ')}
           >
-            <Settings size={18} />
-            {isEditMode ? 'Quitter Edition' : 'Editer le Plan'}
+            {isEditMode ? <CheckCircle2 size={16} /> : <Move size={16} />}
+            {isEditMode ? 'Quitter Edition' : 'Editer Position'}
           </button>
         </div>
+      </div>
 
-        <div className="surface-card flex-1 p-6">
-          <p className="eyebrow mb-4">Reservations a placer</p>
-          <div className="space-y-3 overflow-auto max-h-[400px] pr-2 custom-scrollbar">
-            {reservations.filter(r => r.status === 'confirmed' || r.status === 'pending').map((res) => (
-              <div
-                key={res.id}
-                draggable
-                onDragStart={(e) => e.dataTransfer.setData('text/plain', `reservation:${res.id}`)}
-                className="group flex cursor-grab items-center gap-3 rounded-2xl border border-forest/5 bg-white p-3 shadow-sm transition hover:border-clay/40 hover:shadow-md active:cursor-grabbing"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest/5 text-forest font-bold group-hover:bg-clay group-hover:text-white transition-colors">
-                  {res.guests}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold text-forest">{res.guestName}</p>
-                  <p className="text-[10px] text-ink/40">{new Date(res.date).toLocaleTimeString([], {hour: '2h-digit', minute:'2h-digit'})}</p>
-                </div>
-                <ChevronRight size={14} className="text-forest/20 group-hover:translate-x-1 group-hover:text-clay transition-all" />
-              </div>
-            ))}
-            {reservations.filter(r => r.status === 'confirmed' || r.status === 'pending').length === 0 && (
-              <p className="py-8 text-center text-xs italic text-ink/30">Aucune reservation en attente</p>
-            )}
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Map View */}
-      <div className="relative flex-1 rounded-[3rem] border-8 border-white bg-sand/20 shadow-inner overflow-hidden">
-        <div className="absolute inset-0 grid-pattern opacity-5" />
+      <div className="flex-1 lg:flex min-h-0 bg-[#fbf9f6] relative">
         
-        <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10">
-           <div className="flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-[10px] font-bold shadow-sm backdrop-blur">
-             <div className="h-2 w-2 rounded-full bg-emerald-500" /> <span>Libre</span>
-             <div className="h-2 w-2 rounded-full bg-rose-500 ml-2" /> <span>Occupee</span>
-             <div className="h-2 w-2 rounded-full bg-orange-500 ml-2" /> <span>Reservee</span>
+        {/* Reservation Sidebar for D&D */}
+        <aside className="w-full lg:w-72 bg-sand/30 border-r border-forest/5 p-6 space-y-6 overflow-auto custom-scrollbar">
+           <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-forest/30 mb-4">Attente & Résas</p>
+              <div className="space-y-3">
+                 {reservations.filter(r => r.status === 'pending' || r.status === 'confirmed').length === 0 && (
+                   <div className="p-8 text-center border-2 border-dashed border-forest/5 rounded-2xl">
+                      <Clock size={24} className="mx-auto text-forest/10 mb-2" />
+                      <p className="text-[10px] font-bold text-forest/20 uppercase">Aucun en attente</p>
+                   </div>
+                 )}
+                 {reservations.filter(r => r.status === 'pending' || r.status === 'confirmed').map(r => (
+                   <div 
+                    key={r.id} 
+                    draggable 
+                    onDragStart={(e) => e.dataTransfer.setData('text/plain', `reservation:${r.id}`)}
+                    className="bg-white p-4 rounded-2xl shadow-sm border border-forest/5 cursor-grab active:cursor-grabbing hover:shadow-md transition-all group"
+                   >
+                     <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-sm font-bold text-forest group-hover:text-clay transition-colors">{r.guestName}</p>
+                          <p className="text-[10px] font-bold text-forest/40 uppercase mt-1">{r.guests} Couverts • {new Date(r.date).toLocaleTimeString([], {hour: '2h-digit', minute: '2h-digit'})}</p>
+                        </div>
+                        <Info size={14} className="text-forest/10 group-hover:text-forest/30" />
+                     </div>
+                   </div>
+                 ))}
+              </div>
            </div>
-        </div>
 
-        <div className="relative h-full w-full p-10">
-          {filteredTables.map((table) => {
-            const tOrder = orders.find(o => o.tableId === table.id && o.status !== 'closed');
-            const tRes = reservations.find(r => r.tableId === table.id && (r.status === 'confirmed' || r.status === 'seated'));
-            
-            return (
-              <div
+           <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-forest/30 mb-4">Commandes Ouvertes</p>
+              <div className="space-y-3">
+                 {orders.filter(o => o.status !== 'closed' && !o.tableId).map(o => (
+                   <div 
+                    key={o.id} 
+                    draggable
+                    onDragStart={(e) => e.dataTransfer.setData('text/plain', `order:${o.id}`)}
+                    className="bg-forest/5 p-4 rounded-2xl border border-forest/5 cursor-grab hover:bg-forest/10 transition-all border-dashed"
+                   >
+                     <p className="text-sm font-bold text-forest">{o.customerName || 'Client'}</p>
+                     <p className="text-[10px] font-black text-clay uppercase mt-1">{o.total} XOF • {o.items.length} Plats</p>
+                   </div>
+                 ))}
+              </div>
+           </div>
+        </aside>
+
+        {/* Main Floor Grid */}
+        <div className="flex-1 relative p-12 overflow-hidden bg-[radial-gradient(#13261f_1px,transparent_1px)] bg-[size:40px_40px] bg-opacity-[0.02]">
+           {filteredTables.length === 0 && (
+             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
+                <div className="h-32 w-32 bg-forest/5 rounded-full flex items-center justify-center mb-6">
+                   <Plus size={48} className="text-forest/10" />
+                </div>
+                <h3 className="font-display text-2xl text-forest/40">Aucune table dans cette zone</h3>
+                <p className="text-forest/30 text-sm mt-2">Passez en mode édition pour ajouter de nouvelles tables.</p>
+             </div>
+           )}
+
+           {filteredTables.map(table => {
+             const tOrder = orders.find(o => o.tableId === table.id && o.status !== 'closed');
+             const tRes = reservations.find(r => r.tableId === table.id && (r.status === 'pending' || r.status === 'confirmed'));
+
+             return (
+               <div 
                 key={table.id}
-                className="absolute"
                 style={{ 
                   left: `${table.posX}%`, 
-                  top: `${table.posY}%`, 
-                  width: `${table.width}%`, 
-                  height: `${table.height}%`,
-                  minWidth: '90px',
-                  minHeight: '90px'
+                  top: `${table.posY}%`,
+                  width: `${table.width * 10}px`,
+                  height: `${table.height * 10}px`,
+                  position: 'absolute'
                 }}
-              >
-                <button
-                  type="button"
+                className={['transition-all duration-700 select-none p-1', isEditMode ? 'cursor-move' : ''].join(' ')}
+                onDragOver={(e) => !isEditMode && e.preventDefault()}
+                onDrop={(e) => {
+                  if (isEditMode) return;
+                  const data = e.dataTransfer.getData('text/plain');
+                  if (data.startsWith('reservation:')) onReservationDrop(data.replace('reservation:', ''), table.id);
+                  if (data.startsWith('order:')) onOrderDrop(data.replace('order:', ''), table.id);
+                }}
+               >
+                 <button
                   onClick={() => setDetailsModal(table.id)}
-                  draggable={isEditMode}
-                  onDragStart={(e) => { if (isEditMode) e.dataTransfer.setData('tableId', table.id); }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    const data = e.dataTransfer.getData('text/plain');
-                    if (data.startsWith('reservation:')) onReservationDrop(data.replace('reservation:', ''), table.id);
-                    if (data.startsWith('order:')) onOrderDrop(data.replace('order:', ''), table.id);
-                  }}
                   className={[
-                    'group relative h-full w-full border-2 p-2 shadow-sm transition-all duration-500',
+                    'w-full h-full border-2 transition-all flex flex-col items-center justify-center relative overflow-hidden',
                     tableShapeClass(table.shape),
                     getTableColor(table.status),
-                    detailsModal === table.id ? 'z-20 scale-105 ring-8 ring-white/40 shadow-2xl' : 'hover:scale-102',
-                    isEditMode ? 'cursor-move border-dashed border-white/60 animate-pulse' : 'hover:shadow-lg'
+                    isEditMode ? 'animate-pulse scale-95 border-dashed bg-white shadow-none' : 'shadow-lg hover:scale-105 active:scale-95'
                   ].join(' ')}
-                >
-                  <div className="flex h-full flex-col items-center justify-center pointer-events-none">
-                    <p className="font-display text-xl font-bold">{table.label}</p>
+                 >
+                    {/* Interior patterns for status */}
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
                     
-                    <div className="mt-1 flex items-center justify-center gap-1 opacity-80">
-                      <Users size={12} />
-                      <span className="text-xs font-bold">{table.seats}</span>
+                    <p className="font-display text-2xl font-bold tracking-tight">{table.label}</p>
+                    
+                    <div className="flex items-center gap-1.5 mt-1.5 px-2 py-0.5 rounded-full bg-forest/5">
+                       <Users size={12} className="opacity-40" />
+                       <span className="text-[10px] font-black uppercase opacity-60 tracking-tighter">{table.seats}</span>
                     </div>
 
-                    {table.status === 'occupied' && tOrder && (
-                      <div className="mt-2 flex animate-bounce-slow items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold backdrop-blur">
-                        <Clock size={10} />
-                        {formatElapsedTime(tOrder.createdAt)}
-                      </div>
-                    )}
-
-                    {table.status === 'reserved' && tRes && (
-                       <div className="mt-2 text-[10px] font-bold uppercase tracking-tight opacity-90 truncate max-w-full">
-                         {tRes.guestName.split(' ')[0]}
+                    {table.status === 'occupied' && (
+                       <div className="mt-2 text-[10px] font-bold text-rose-800 bg-white/40 px-3 py-1 rounded-full animate-pulse">
+                         {tOrder ? formatElapsedTime(tOrder.createdAt) : '0 min'}
                        </div>
                     )}
-                  </div>
 
-                  {/* Visual alert for long wait */}
-                  {table.status === 'occupied' && tOrder && (
-                     <div className="absolute -right-1 -top-1 block h-3 w-3 rounded-full bg-wine ring-2 ring-white animate-ping" />
-                  )}
-                </button>
-              </div>
-            );
-          })}
+                    {table.status === 'reserved' && (
+                       <div className="absolute bottom-4 inset-x-0 mx-auto px-2">
+                          <p className="text-[10px] font-black uppercase text-center bg-white/60 p-1 rounded-lg backdrop-blur truncate">
+                             {tRes?.guestName || 'Réservé'}
+                          </p>
+                       </div>
+                    )}
+                 </button>
+
+                 {/* Corner indicator for edit mode */}
+                 {isEditMode && (
+                   <div className="absolute -right-2 -bottom-2 h-6 w-6 bg-clay text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                      <Maximize2 size={12} />
+                   </div>
+                 )}
+               </div>
+             );
+           })}
         </div>
       </div>
 
       {/* Details Modal */}
       {detailsModal && selectedTable && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-forest/60 p-4 backdrop-blur-sm transition-all">
-          <div className="w-full max-w-lg rounded-[2.5rem] bg-white p-8 shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="eyebrow">{selectedTable.zone}</p>
-                <h3 className="mt-1 font-display text-3xl text-forest">{selectedTable.label}</h3>
-              </div>
-              <button onClick={() => setDetailsModal(null)} className="rounded-full bg-sand/50 p-2 text-forest/40 hover:bg-forest/5 hover:text-forest">
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="mt-8 grid grid-cols-2 gap-4">
-              <div className="rounded-3xl bg-sand/30 p-4">
-                <p className="text-xs font-bold text-forest/40 uppercase">Statut</p>
-                <div className="mt-2 flex items-center gap-2">
-                   <div className={['h-3 w-3 rounded-full', getTableColor(selectedTable.status).split(' ')[0]].join(' ')} />
-                   <span className="font-bold text-forest capitalize">{selectedTable.status}</span>
-                </div>
-              </div>
-              <div className="rounded-3xl bg-sand/30 p-4">
-                <p className="text-xs font-bold text-forest/40 uppercase">Capacite</p>
-                <div className="mt-2 flex items-center gap-2 text-forest">
-                   <Users size={18} />
-                   <span className="font-bold">{selectedTable.seats} personnes</span>
-                </div>
-              </div>
-            </div>
-
-            {selectedTable.status === 'occupied' && activeOrder && (
-               <div className="mt-6 rounded-3xl border border-rose-100 bg-rose-50/50 p-6">
-                 <div className="flex items-center justify-between">
-                   <h4 className="font-bold text-rose-800">Commande en cours</h4>
-                   <span className="rounded-full bg-rose-200 px-3 py-1 text-xs font-bold text-rose-700">Depuis {formatElapsedTime(activeOrder.createdAt)}</span>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0f1d18]/60 p-4 backdrop-blur-md">
+           <div className="w-full max-w-lg bg-white rounded-[3rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+              <div className="relative p-10 pb-4 text-center">
+                 <button onClick={() => setDetailsModal(null)} className="absolute top-8 right-8 text-forest/20 hover:text-forest transition-colors">
+                    <X size={24} />
+                 </button>
+                 <p className="text-[10px] font-black uppercase tracking-[0.4em] text-forest/30 mb-2">{selectedTable.zone}</p>
+                 <h3 className="font-display text-5xl text-forest mb-4 underline decoration-gold/30 underline-offset-8">{selectedTable.label}</h3>
+                 <div className="flex justify-center gap-2">
+                    <span className={['px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest', getTableColor(selectedTable.status)].join(' ')}>
+                       {selectedTable.status}
+                    </span>
+                    <span className="px-4 py-1.5 rounded-full bg-sand text-forest/60 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                       <Users size={12} /> {selectedTable.seats} Couverts
+                    </span>
                  </div>
-                 <div className="mt-4 space-y-2">
-                   {activeOrder.items.map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-sm">
-                        <span className="font-medium text-forest">{item.quantity}x {item.name}</span>
-                        <span className="font-bold text-rose-900">{item.unitPrice * item.quantity} XOF</span>
-                      </div>
-                   ))}
-                 </div>
-                 <div className="mt-4 border-t border-rose-200 pt-4 flex justify-between items-center">
-                    <span className="text-sm font-bold text-rose-800 uppercase">Total</span>
-                    <span className="text-xl font-display text-rose-900">{activeOrder.total} XOF</span>
-                 </div>
-               </div>
-            )}
-
-            {selectedTable.status === 'reserved' && activeReservation && (
-               <div className="mt-6 rounded-3xl border border-orange-100 bg-orange-50/50 p-6">
-                 <h4 className="font-bold text-orange-800">Reservation</h4>
-                 <div className="mt-4 space-y-3">
-                   <div className="flex items-center gap-3">
-                     <User size={18} className="text-orange-400" />
-                     <span className="font-medium">{activeReservation.guestName}</span>
-                   </div>
-                   <div className="flex items-center gap-3">
-                     <Clock size={18} className="text-orange-400" />
-                     <span className="font-medium">{new Date(activeReservation.date).toLocaleTimeString()}</span>
-                   </div>
-                 </div>
-               </div>
-            )}
-
-            <div className="mt-10 flex flex-col gap-3">
-              <button 
-                onClick={() => { onSelect(selectedTable.id); setDetailsModal(null); }}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-forest py-4 font-bold text-white shadow-xl transition hover:bg-clay"
-              >
-                Ouvrir la gestion detaillee
-                <ChevronRight size={18} />
-              </button>
-              
-              <div className="grid grid-cols-2 gap-3">
-                {selectedTable.status !== 'available' && (
-                  <button 
-                    onClick={() => { onStatusChange?.(selectedTable.id, 'available'); setDetailsModal(null); }}
-                    className="rounded-full border border-forest/15 py-4 text-sm font-bold text-forest transition hover:bg-forest/5"
-                  >
-                    Libérer la table
-                  </button>
-                )}
-                {selectedTable.status === 'cleaning' && (
-                  <button 
-                    onClick={() => { onStatusChange?.(selectedTable.id, 'available'); setDetailsModal(null); }}
-                    className="rounded-full bg-emerald-500 py-4 text-sm font-bold text-white shadow-lg"
-                  >
-                    Pret pour service
-                  </button>
-                )}
-                {selectedTable.status === 'available' && (
-                   <button 
-                    onClick={() => { onStatusChange?.(selectedTable.id, 'cleaning'); setDetailsModal(null); }}
-                    className="rounded-full border border-forest/15 py-4 text-sm font-bold text-forest"
-                   >
-                     Marquer Nettoyage
-                   </button>
-                )}
               </div>
-            </div>
-          </div>
+
+              <div className="p-10 pt-6">
+                 {/* Dynamics based on status */}
+                 <div className="bg-[#f8f5f0] rounded-[2.5rem] p-8 mb-8 border border-forest/5">
+                    {selectedTable.status === 'occupied' ? (
+                       <div className="space-y-6">
+                          <div className="flex justify-between items-center text-rose-800">
+                             <div className="flex items-center gap-3">
+                                <Sparkles size={20} className="text-gold" />
+                                <span className="font-bold text-lg">Occupation en cours</span>
+                             </div>
+                             <span className="text-xs font-black bg-rose-200/50 px-3 py-1 rounded-full">{formatElapsedTime(activeOrder?.createdAt || new Date().toISOString())}</span>
+                          </div>
+                          <div className="space-y-3">
+                             {activeOrder?.items.map((item, i) => (
+                               <div key={i} className="flex justify-between items-center bg-white/60 p-3 rounded-2xl">
+                                  <span className="text-sm font-bold text-forest">{item.quantity}x {item.name}</span>
+                                  <span className="text-xs font-black text-clay">{item.unitPrice * item.quantity} XOF</span>
+                               </div>
+                             ))}
+                          </div>
+                          <div className="flex justify-between items-center pt-4 border-t border-forest/5">
+                             <span className="text-sm font-black text-forest uppercase tracking-widest opacity-40">Additif total</span>
+                             <span className="text-2xl font-display text-forest">{activeOrder?.total || 0} XOF</span>
+                          </div>
+                       </div>
+                    ) : selectedTable.status === 'reserved' ? (
+                       <div className="text-center space-y-4 py-4">
+                          <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm">
+                             <User className="text-gold" size={32} />
+                          </div>
+                          <div>
+                             <p className="text-lg font-bold text-forest">{activeReservation?.guestName || 'Aucun nom'}</p>
+                             <p className="text-sm text-forest/40">Réservé pour {new Date(activeReservation?.date || '').toLocaleTimeString([], { hour: '2h-digit', minute: '2h-digit'})}</p>
+                          </div>
+                       </div>
+                    ) : (
+                       <div className="text-center py-10 opacity-30">
+                          <Layout size={40} className="mx-auto mb-4" />
+                          <p className="text-lg font-display uppercase tracking-[0.2em]">Table Disponible</p>
+                       </div>
+                    )}
+                 </div>
+
+                 <div className="grid grid-cols-2 gap-4">
+                    <button 
+                      onClick={() => { onSelect(selectedTable.id); setDetailsModal(null); }}
+                      className="col-span-2 py-5 rounded-2xl bg-forest text-white font-bold uppercase tracking-widest text-xs shadow-xl shadow-forest/20 hover:scale-[1.02] transition-all"
+                    >
+                       Ouvrir dans la Gestion Détails
+                    </button>
+                    <button 
+                      onClick={() => { onStatusChange?.(selectedTable.id, 'available'); setDetailsModal(null); }}
+                      className="py-4 rounded-2xl border border-forest/10 text-emerald-600 font-bold uppercase tracking-widest text-[10px] hover:bg-emerald-50 transition-all"
+                    >
+                       Rétablir Libre
+                    </button>
+                    <button 
+                      onClick={() => { onStatusChange?.(selectedTable.id, 'cleaning'); setDetailsModal(null); }}
+                      className="py-4 rounded-2xl border border-forest/10 text-rose-500 font-bold uppercase tracking-widest text-[10px] hover:bg-rose-50 transition-all"
+                    >
+                       Mettre Nettoyage
+                    </button>
+                 </div>
+              </div>
+           </div>
         </div>
       )}
     </div>
