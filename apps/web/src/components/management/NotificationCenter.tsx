@@ -77,7 +77,7 @@ export function NotificationCenter({
                         <p className="mt-1 text-xs text-white/50 line-clamp-2 leading-relaxed font-medium">{notif.message}</p>
                         <p className="mt-3 text-[9px] font-black text-white/20 uppercase tracking-widest flex items-center gap-1.5">
                            <Clock size={10} />
-                           {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2h-digit', minute: '2h-digit' })}
+                           {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
                       
