@@ -1,50 +1,38 @@
-# 🌵 Restaurant Management Platform - Hotel Cactus
+# AnyxTech Restaurant Management - Le Cactus 🌵
 
-Une plateforme de gestion hôtelière et de restauration premium, conçue pour l'excellence opérationnelle et l'élégance visuelle.
+This is a complete full-stack restaurant management platform built with React, NestJS, and PostgreSQL. It focuses on premium user experience, complete control over the restaurant flow (tables, booking, POS, kitchen, caching), and a modern dynamic public showcase.
 
-## 🚀 Fonctionnalités Clés
+## Workspace Architecture
+The application is a monorepo consisting of:
+- **`apps/web`**: Frontend built in React + Vite + TailwindCSS.
+- **`apps/api`**: Backend API built in NestJS + Prisma/TypeORM connected to postgres.
+- **`db`**: Database configuration containing SQL initial schemas (e.g. `init.sql`).
 
-### 1. Interface de Gestion (Dashboard)
-- **Tableau de Bord Holistique** : Suivi du chiffre d'affaires journalier, des commandes actives et du flux staff dans une vue unifiée.
-- **Plan de Salle Interactif 2.0** : Vue graphique dynamique des zones (Salle, Terrasse, VIP) avec support du Glisser-Déposer (Drag & Drop) pour les réservations et commandes.
-- **Real-Time Data Sync** : Synchronisation toutes les 5 secondes pour une réactivité absolue en plein service.
-- **Centre de Notifications Premium** : Alertes visuelles et sonores pour les nouvelles réservations, les commandes prêtes et les encaissements réussis.
+## Core Functionalities
 
-### 2. Expérience Client & Service
-- **Menu Digital Vivant** : Support complet des images haute résolution pour les plats, facilitant la vente visuelle.
-- **Gestion de la Caisse & Invoicing** : Module d'encaissement sécurisé avec génération de factures professionnelles ("Note de Détails") prêtes à l'impression.
-- **Réservations Intelligentes** : Système de filtrage et d'attribution automatique des tables.
+### 1. Front-Office (Public Facing Website)
+A stunning glassmorphic UI representing the hotel/restaurant.
+- **Dynamic Menu ('La Carte')**: Showcases meals instantly fetched from the backend.
+- **Booking ('Réservation')**: Allows end-users to book seats seamlessly. A streamlined hero CTA helps boost conversions.
 
-### 3. Sécurité & Design
-- **Authentification Glassmorphique** : Page de connexion moderne et ultra-sécurisée avec gestion des rôles (Super Admin, Admin, Chef, Serveur, Caissier).
-- **Design Adaptatif (Responsive)** : Utilisabilité totale sur Tablettes (pour le service en salle) et Desktop (pour l'administration).
+### 2. Back-Office (Management Dashboard)
+Available entirely under the `/management` route, it provides role-based functionality:
 
-## 🛠 Stack Technique
+- **Dashboard / Metrics**: Instant summary of revenues and active tables.
+- **Team Management (`Equipe`)**: HR logic to add/remove and modify permissions for staff (Waiters, Chefs, Cashiers, Admins). Simplistic layout prioritizing performance.
+- **Plan de Salle (`Floor Plan`)**: Interactive drag-and-drop table grid where owners can redesign tables spatially. Waiters can assign reservations, drag orders to tables, and immediately instantiate ticket orders for seated users.
+- **Service & Reservations**: Streamlines table assigning. An action logic enforces status changes (Pending -> Confirmed -> Seated -> Completed -> Cleaned).
+- **Cuisine & Menu (`Kitchen`)**: Chefs view incoming orders via the `En préparation` and `Prêt` queue. Live updating helps kitchen output remain hot and timely.
+- **Caisse & Facturation (`Cashier`)**: Close out tickets, process payments via Cash, Card or Mobile Money, and seamlessly print/download PDF invoices designed securely for accounting purposes.
 
-- **Frontend** : React 18, Tailwind CSS (Glassmorphism), Lucide Icons, Vite.
-- **Backend** : NestJS, Prisma ORM.
-- **Database** : PostgreSQL.
-- **UI/UX** : Design system basé sur les couleurs signature : #0F1D18 (Forest), #D8A25E (Gold).
+## Security & Workflow
+- Role-Based Access Control (RBAC): Every function is properly scoped to an Auth user (`super_admin`, `admin`, `cashier`, etc.).
+- Continuous Integration (`.github/workflows/ci.yml`): The CI/CD checks the entire TypeScript schema, unit tests, linters, and conducts a Docker composite build for smooth deployment safely blocking bad pushes from entering production.
 
-## 📖 Guide de Démarrage
-
-### Prérequis
-- Node.js (v18+)
-- PostgreSQL
-
-### Installation
-1. Clonez le dépôt.
-2. Installez les dépendances : `npm install`.
-3. Configurez les variables d'environnement (`.env`) pour le backend API.
-4. Lancez le mode développement : `npm run dev`.
-
----
-
-## 📅 Roadmap & Évolutions
-- [x] Refonte graphique du plan de salle (Drag & Drop).
-- [x] Système de facturation professionnelle.
-- [x] Dashboard de revenus analytique.
-- [ ] Intégration de paiements mobiles directs.
-- [ ] Module de gestion de stock en temps réel.
-
-© 2026 Hôtel Cactus. Développé pour l'excellence hôtelière au Bénin.
+## Getting Started
+To spin up:
+```bash
+npm install # Setup all repo deps
+npm run build # Run monorepo compiler
+```
+Wait for tests to pass or spin `docker compose build` for container deployment automatically verified by GitHub actions.
