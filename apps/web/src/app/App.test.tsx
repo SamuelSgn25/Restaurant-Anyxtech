@@ -14,9 +14,10 @@ describe('App', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getAllByText(/Restaurant Hotel Cactus/i)[0]).toBeInTheDocument();
+    expect(screen.getByText('Le Cactus')).toBeInTheDocument();
+    expect(screen.getByText(/Hotel restaurant/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Une table qui marie finesse francaise et chaleur beninoise/i)
+      screen.getByText(/Une Odyssée culinaire entre Terre et Mer/i)
     ).toBeInTheDocument();
   });
 });
