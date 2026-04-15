@@ -2,9 +2,10 @@ import { useState, useMemo, useEffect } from 'react';
 import { 
   Users, Clock, User, ChevronRight, X, LayoutGrid, 
   MapPin, Maximize2, Move, Layout, CheckCircle2, 
-  Trash2, Plus, Info, Sparkles 
+  Trash2, Plus, Info, Sparkles, Settings 
 } from 'lucide-react';
 import { RestaurantTable, Reservation, Order, TableStatus } from '../../types/management';
+import { FloorPlanConfig } from './FloorPlanConfig';
 
 interface FloorPlanProps {
   tables: RestaurantTable[];
@@ -32,6 +33,7 @@ export function FloorPlanBoard({
   const [activeZone, setActiveZone] = useState('Salle principale');
   const [isEditMode, setIsEditMode] = useState(false);
   const [detailsModal, setDetailsModal] = useState<string | null>(null);
+  const [configMode, setConfigMode] = useState(false);
 
   const zones = useMemo(() => Array.from(new Set(tables.map((t) => t.zone))), [tables]);
   const filteredTables = useMemo(() => tables.filter((t) => t.zone === activeZone), [tables, activeZone]);
@@ -66,7 +68,21 @@ export function FloorPlanBoard({
   const activeReservation = useMemo(() => reservations.find((r) => r.tableId === detailsModal), [reservations, detailsModal]);
 
   return (
-    <div className="relative flex flex-col h-full min-h-[700px] bg-white rounded-[2.5rem] border border-forest/5 shadow-xl overflow-hidden">
+    <>
+      {configMode ? (
+        <div className="p-8 bg-white rounded-[2.5rem] border border-forest/5 shadow-xl">
+          <div className="flex justify-between items-center mb-8">
+            <FloorPlanConfig />
+            <button
+              onClick={() => setConfigMode(false)}
+              className="absolute top-12 right-12 p-3 rounded-full border border-forest/10 hover:bg-forest/5"
+            >
+              <X size={20} className="text-forest" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="relative flex flex-col h-full min-h-[700px] bg-white rounded-[2.5rem] border border-forest/5 shadow-xl overflow-hidden">
       
       {/* Upper Control Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between p-6 gap-4 border-b border-forest/5 bg-sand/20">
@@ -83,6 +99,13 @@ export function FloorPlanBoard({
         </div>
 
         <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setConfigMode(true)}
+            className={['flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-sm', 'bg-white text-forest border border-forest/10 hover:bg-forest/5'].join(' ')}
+          >
+            <Settings size={16} />
+            Configuration
+          </button>
           <button 
             onClick={() => setIsEditMode(!isEditMode)}
             className={['flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-sm', isEditMode ? 'bg-clay text-white' : 'bg-white text-forest border border-forest/10 hover:bg-forest/5'].join(' ')}
@@ -311,6 +334,8 @@ export function FloorPlanBoard({
            </div>
         </div>
       )}
-    </div>
+        </div>
+      )}
+    </>
   );
 }
