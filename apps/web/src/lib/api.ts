@@ -55,6 +55,12 @@ export const api = {
       body: JSON.stringify(payload)
     }, token);
   },
+  updateProfile(payload: { name?: string; phone?: string; address?: string }, token: string) {
+    return request<AuthUser>('/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(payload)
+    }, token);
+  },
   dashboard(token: string) {
     return request<DashboardSummary>('/dashboard/summary', undefined, token);
   },
@@ -71,6 +77,17 @@ export const api = {
     return request<MenuItem>(`/menu/${id}/availability`, {
       method: 'PATCH',
       body: JSON.stringify({ available })
+    }, token);
+  },
+  updateMenuItemAvailability(id: string, available: boolean, token: string) {
+    return request<MenuItem>(`/menu/${id}/availability`, {
+      method: 'PATCH',
+      body: JSON.stringify({ available })
+    }, token);
+  },
+  deleteMenuItem(id: string, token: string) {
+    return request<void>(`/menu/${id}`, {
+      method: 'DELETE'
     }, token);
   },
   publicTables() {
@@ -204,6 +221,17 @@ export const api = {
     return request<AuthUser>('/staff', {
       method: 'POST',
       body: JSON.stringify(payload)
+    }, token);
+  },
+  deleteStaff(id: string, token: string) {
+    return request<void>(`/staff/${id}`, {
+      method: 'DELETE'
+    }, token);
+  },
+  resetPassword(id: string, newPassword: string, token: string) {
+    return request<void>(`/staff/${id}/password`, {
+      method: 'PATCH',
+      body: JSON.stringify({ newPassword })
     }, token);
   },
   notifications(token: string) {
