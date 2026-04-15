@@ -24,7 +24,7 @@ import { StatusBadge } from '../components/management/StatusBadge';
 import { 
   FileText, User, Settings as SettingsIcon, LogOut, Package, 
   Users, Plus, LayoutGrid, CheckCircle2, TrendingUp, 
-  DollarSign, Calendar, Clock, ChevronRight, Menu as MenuIcon, X 
+  DollarSign, Calendar, Clock, ChevronRight, Menu as MenuIcon, X, Utensils 
 } from 'lucide-react';
 
 type ViewKey = 'overview' | 'tables' | 'service' | 'kitchen' | 'cashier' | 'team';
