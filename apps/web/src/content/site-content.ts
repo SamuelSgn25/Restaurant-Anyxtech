@@ -4,7 +4,8 @@ export const siteContent = {
   restaurant: {
     name: 'Le Cactus',
     tagline: 'L’élégance culinaire au cœur de Cotonou',
-    logo: '/logo.png'
+    logo: '/logo.png',
+    footerNote: 'Une architecture contemporaine avec une touche traditionnelle béninoise.'
   },
   pages: [
     {
