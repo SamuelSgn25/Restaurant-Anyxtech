@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, Trash2, Edit2, ChevronDown, LayoutGrid, Users, Check } from 'lucide-react';
+import { Plus, Trash2, Edit2, ChevronDown, LayoutGrid, Users, Check, Loader } from 'lucide-react';
+import { api } from '../../lib/api';
 
 interface Zone {
   id: string;
@@ -16,10 +17,11 @@ const DEFAULT_ZONES: Zone[] = [
   { id: 'vip', name: 'VIP', description: 'Espace privé', tableCount: 4, defaultSeats: 6, color: 'bg-gold' }
 ];
 
-export function FloorPlanConfig() {
+export function FloorPlanConfig({ onSave, token }: { onSave?: () => void; token?: string }) {
   const [zones, setZones] = useState<Zone[]>(DEFAULT_ZONES);
   const [expandedZone, setExpandedZone] = useState<string | null>('main-hall');
   const [editingZone, setEditingZone] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const addZone = () => {
     const newZone: Zone = {
@@ -41,6 +43,39 @@ export function FloorPlanConfig() {
 
   const updateZone = (id: string, updates: Partial<Zone>) => {
     setZones(zones.map(z => z.id === id ? { ...z, ...updates } : z));
+  };
+
+  const handleSaveConfiguration = async () => {
+    if (!token) return;
+    setIsSaving(true);
+    try {
+      // Generate and create tables for each zone
+      for (const zone of zones) {
+        for (let i = 0; i < zone.tableCount; i++) {
+          // Generate random positions within the zone area
+          const posX = Math.random() * 70 + 10; // Between 10-80%
+          const posY = Math.random() * 70 + 10;
+          const tableLabel = `${zone.name.substring(0, 1)}${i + 1}`;
+          
+          await api.createTable({
+            label: tableLabel,
+            zone: zone.name,
+            seats: zone.defaultSeats,
+            shape: 'round' as const,
+            posX,
+            posY,
+            width: 6,
+            height: 6,
+            status: 'available' as const
+          }, token);
+        }
+      }
+      onSave?.();
+    } catch (error) {
+      console.error('Failed to save configuration:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -71,7 +106,7 @@ export function FloorPlanConfig() {
             {/* Zone Header */}
             <button
               onClick={() => setExpandedZone(expandedZone === zone.id ? null : zone.id)}
-              className="w-full px-8 py-6 flex items-center justify-between hover:bg-forest/2 transition-all"
+              className="w-full px-8 py-6 flex items-center justify-between hover:bg-forest/2transition-all"
             >
               <div className="flex items-center gap-4">
                 <div className={`${zone.color} w-8 h-8 rounded-lg`} />
@@ -227,8 +262,22 @@ export function FloorPlanConfig() {
 
       {/* Save Button */}
       <div className="flex gap-4">
-        <button className="flex-1 py-4 rounded-full bg-gradient-to-r from-forest to-forest/90 text-white font-black uppercase tracking-widest shadow-lg shadow-forest/20 hover:scale-105 transition-all">
-          ✓ Enregistrer Configuration
+        <button 
+          onClick={handleSaveConfiguration}
+          disabled={isSaving}
+          className="flex-1 py-4 rounded-full bg-gradient-to-r from-forest to-forest/90 text-white font-black uppercase tracking-widest shadow-lg shadow-forest/20 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {isSaving ? (
+            <>
+              <Loader size={18} className="animate-spin" />
+              Génération en cours...
+            </>
+          ) : (
+            <>
+              <Check size={18} />
+              Enregistrer & Générer Tables
+            </>
+          )}
         </button>
       </div>
     </div>
