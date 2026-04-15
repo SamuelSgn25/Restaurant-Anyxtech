@@ -116,7 +116,7 @@ export function FloorPlanBoard({
                      <div className="flex justify-between items-start">
                         <div>
                           <p className="text-sm font-bold text-forest group-hover:text-clay transition-colors">{r.guestName}</p>
-                          <p className="text-[10px] font-bold text-forest/40 uppercase mt-1">{r.guests} Couverts • {new Date(r.date).toLocaleTimeString([], {hour: '2h-digit', minute: '2h-digit'})}</p>
+                          <p className="text-[10px] font-bold text-forest/40 uppercase mt-1">{r.guests} Couverts • {new Date(r.date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</p>
                         </div>
                         <Info size={14} className="text-forest/10 group-hover:text-forest/30" />
                      </div>
