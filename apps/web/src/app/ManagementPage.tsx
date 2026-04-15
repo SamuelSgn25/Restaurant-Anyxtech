@@ -139,7 +139,27 @@ export function ManagementPage() {
              <Link to="/" className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-all">
                 Aller au site
              </Link>
-             <NotificationCenter notifications={notifications} open={notifOpen} onToggle={() => { setNotifOpen(!notifOpen); setAccountOpen(false); }} onRead={(id) => api.markNotificationRead(id, authToken)} />
+             <NotificationCenter 
+               notifications={notifications} 
+               open={notifOpen} 
+               onToggle={() => { setNotifOpen(!notifOpen); setAccountOpen(false); }} 
+               onRead={(id) => api.markNotificationRead(id, authToken)} 
+               onReadAll={() => {
+                 notifications.filter(n => !n.read).forEach(n => api.markNotificationRead(n.id, authToken));
+                 loadData();
+               }}
+               onNavigate={(type) => {
+                 setNotifOpen(false);
+                 switch(type) {
+                   case 'reservation': setActiveView('service'); break;
+                   case 'order': setActiveView('kitchen'); break;
+                   case 'payment': setActiveView('cashier'); break;
+                   case 'table': setActiveView('tables'); break;
+                   case 'staff': setActiveView('team'); break;
+                   default: setActiveView('overview');
+                 }
+               }}
+             />
              <AccountMenu user={user} open={accountOpen} onToggle={() => { setAccountOpen(!accountOpen); setNotifOpen(false); }} onSelect={(v) => { setUtilityView(v); setActiveView('overview'); setAccountOpen(false); }} onLogout={logout} />
           </div>
         </div>
@@ -251,6 +271,8 @@ export function ManagementPage() {
                <FloorPlanBoard 
                 tables={tables} reservations={pendingRes} orders={activeOrders} 
                 selectedTableId={selectedTableId} onSelect={setSelectedTableId}
+                token={authToken}
+                onLoadData={loadData}
                 onReservationDrop={(rid, tid) => api.assignReservationTable(rid, tid, authToken).then(loadData)}
                 onOrderDrop={(oid, tid) => api.moveOrderTable(oid, tid, authToken).then(loadData)}
                 onStatusChange={(tid, s) => api.updateTableStatus(tid, s, authToken).then(loadData)}
