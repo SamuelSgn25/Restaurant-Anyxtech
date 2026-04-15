@@ -100,6 +100,16 @@ export class RestaurantDataService {
     return safeUser;
   }
 
+  updateUserProfile(userId: string, payload: { name?: string; phone?: string; address?: string }) {
+    const user = this.getUserById(userId);
+    if (payload.name) user.name = payload.name;
+    if (payload.phone) user.phone = payload.phone;
+    if (payload.address) user.address = payload.address;
+    this.pushNotification('staff', 'Profil modifie', `${user.name} a mis a jour son profil.`);
+    const { password, ...safeUser } = user;
+    return safeUser;
+  }
+
   createStaff(createdBy: { id: string; role: UserRole }, payload: Omit<StaffUser, 'id' | 'active'>) {
     if (this.users.some((entry) => entry.email === payload.email)) throw new BadRequestException('Cet email est deja utilise');
     const allowedRoles: Record<UserRole, UserRole[]> = {
