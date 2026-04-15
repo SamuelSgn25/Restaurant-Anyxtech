@@ -3,7 +3,7 @@ import { LucideIcon } from 'lucide-react';
 export type SectionType =
   | 'hero'
   | 'story'
-  | 'highlights'
+  | 'features'
   | 'menu-showcase'
   | 'gallery'
   | 'reservation-cta'
@@ -40,8 +40,8 @@ export interface HighlightItem {
   icon: LucideIcon;
 }
 
-export interface HighlightsSection {
-  type: 'highlights';
+export interface FeaturesSection {
+  type: 'features';
   eyebrow: string;
   title: string;
   items: readonly HighlightItem[];
@@ -95,7 +95,7 @@ export interface ContactSection {
 export type PageSection =
   | HeroSection
   | StorySection
-  | HighlightsSection
+  | FeaturesSection
   | MenuShowcaseSection
   | GallerySection
   | ReservationCtaSection
