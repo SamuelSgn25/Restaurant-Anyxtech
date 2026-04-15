@@ -1,12 +1,13 @@
 import { RestaurantDataService } from './restaurant-data.service';
 
 describe('RestaurantDataService', () => {
+  const mockEventsGateway = { broadcast: jest.fn() } as any;
+
   it('tracks table occupancy when an order is created and closed', () => {
-    const service = new RestaurantDataService();
+    const service = new RestaurantDataService(mockEventsGateway);
 
     const created = service.createOrder({
       tableId: 'tbl-1',
-      tableLabel: 'Table 01',
       customerName: 'Client test',
       serverId: 'usr-server-1',
       items: [

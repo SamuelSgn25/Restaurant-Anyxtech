@@ -236,7 +236,7 @@ export class RestaurantDataService {
 
   getOrders() { return this.orders.map((order) => ({ ...order, total: this.computeOrderTotal(order) })); }
 
-  createOrder(payload: Omit<OrderRecord, 'id' | 'createdAt' | 'status'>) {
+  createOrder(payload: Omit<OrderRecord, 'id' | 'createdAt' | 'status' | 'tableLabel'>) {
     const table = this.findTable(payload.tableId);
     const order: OrderRecord = { id: `ord-${Date.now()}`, createdAt: new Date().toISOString(), status: 'draft', ...payload, tableLabel: table.label };
     table.status = 'occupied';
