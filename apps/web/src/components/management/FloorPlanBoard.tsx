@@ -19,6 +19,8 @@ interface FloorPlanProps {
   onStatusChange?: (tableId: string, status: TableStatus) => void;
   onUpdateTablePosition?: (tableId: string, posX: number, posY: number) => void;
   onLoadData?: () => void;
+  menu?: any[];
+  onCreateOrder?: (payload: any) => Promise<void>;
 }
 
 export function FloorPlanBoard({
@@ -32,7 +34,9 @@ export function FloorPlanBoard({
   onOrderDrop,
   onStatusChange,
   onUpdateTablePosition,
-  onLoadData
+  onLoadData,
+  menu,
+  onCreateOrder
 }: FloorPlanProps) {
   const [activeZone, setActiveZone] = useState('Salle principale');
   const [isEditMode, setIsEditMode] = useState(false);
@@ -197,7 +201,19 @@ export function FloorPlanBoard({
                   position: 'absolute'
                 }}
                 className={['transition-all duration-700 select-none p-1', isEditMode ? 'cursor-move' : ''].join(' ')}
+                draggable={isEditMode}
                 onDragOver={(e) => !isEditMode && e.preventDefault()}
+                onDragEnd={(e) => {
+                  if (isEditMode && onUpdateTablePosition) {
+                    const parent = e.currentTarget.parentElement?.getBoundingClientRect();
+                    if (!parent) return;
+                    const rawX = ((e.clientX - parent.left) / parent.width) * 100;
+                    const rawY = ((e.clientY - parent.top) / parent.height) * 100;
+                    const posX = Math.max(0, Math.min(100 - table.width, rawX));
+                    const posY = Math.max(0, Math.min(100 - table.height, rawY));
+                    onUpdateTablePosition(table.id, posX, posY);
+                  }
+                }}
                 onDrop={(e) => {
                   if (isEditMode) return;
                   const data = e.dataTransfer.getData('text/plain');
@@ -310,6 +326,29 @@ export function FloorPlanBoard({
                        <div className="text-center py-10 opacity-30">
                           <Layout size={40} className="mx-auto mb-4" />
                           <p className="text-lg font-display uppercase tracking-[0.2em]">Table Disponible</p>
+                        </div>
+                     )}
+                     
+                     {!activeOrder && onCreateOrder && selectedTable.status === 'occupied' && (
+                        <button 
+                          onClick={() => {
+                            const firstMenuItem = menu?.[0]?.items[0];
+                            if (!firstMenuItem) return alert("Le menu est vide, veuillez créer des plats.");
+                            onCreateOrder({
+                              tableId: selectedTable.id,
+                              tableLabel: selectedTable.label,
+                              customerName: activeReservation?.guestName || "Client X",
+                              items: [{ menuItemId: firstMenuItem.id, name: firstMenuItem.name, quantity: 1, unitPrice: firstMenuItem.price }],
+                              notes: 'Commande prise sur tablette (test auto)'
+                            }).then(() => setDetailsModal(null));
+                          }}
+                          className="w-full mt-4 py-4 rounded-xl bg-gold text-forest font-bold uppercase tracking-widest text-xs hover:bg-gold/80 transition-all"
+                        >
+                           + Prendre Commande (Test Rapide)
+                        </button>
+                     )}
+                     {false ? (
+                        <div className="hidden">
                        </div>
                     )}
                  </div>
