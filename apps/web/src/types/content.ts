@@ -22,7 +22,7 @@ export interface HeroSection {
   description: string;
   primaryCta: { label: string; href: string };
   secondaryCta: { label: string; href: string };
-  stats: Array<{ label: string; value: string }>;
+  stats: readonly { label: string; value: string }[];
   image: string;
 }
 
@@ -30,7 +30,7 @@ export interface StorySection {
   type: 'story';
   eyebrow: string;
   title: string;
-  paragraphs: string[];
+  paragraphs: readonly string[];
   image: string;
 }
 
@@ -44,27 +44,27 @@ export interface HighlightsSection {
   type: 'highlights';
   eyebrow: string;
   title: string;
-  items: HighlightItem[];
+  items: readonly HighlightItem[];
 }
 
 export interface MenuCategory {
   title: string;
   description: string;
-  items: Array<{ name: string; description: string; price: string }>;
+  items: readonly { name: string; description: string; price: string }[];
 }
 
 export interface MenuShowcaseSection {
   type: 'menu-showcase';
   eyebrow: string;
   title: string;
-  categories: MenuCategory[];
+  categories: readonly MenuCategory[];
 }
 
 export interface GallerySection {
   type: 'gallery';
   eyebrow: string;
   title: string;
-  images: Array<{ src: string; alt: string }>;
+  images: readonly { src: string; alt: string }[];
 }
 
 export interface ReservationCtaSection {
@@ -72,14 +72,14 @@ export interface ReservationCtaSection {
   eyebrow: string;
   title: string;
   description: string;
-  bullets: string[];
+  bullets: readonly string[];
 }
 
 export interface TestimonialsSection {
   type: 'testimonials';
   eyebrow: string;
   title: string;
-  items: Array<{ quote: string; author: string; role: string }>;
+  items: readonly { quote: string; author: string; role: string }[];
 }
 
 export interface ContactSection {
@@ -89,7 +89,7 @@ export interface ContactSection {
   address: string;
   phone: string;
   email: string;
-  schedule: string[];
+  schedule: readonly string[];
 }
 
 export type PageSection =
@@ -106,15 +106,15 @@ export interface SitePage {
   slug: string;
   label: string;
   title: string;
-  sections: PageSection[];
+  sections: readonly PageSection[];
 }
 
 export interface SiteContent {
-  brand: {
+  restaurant: {
     name: string;
     tagline: string;
+    logo: string;
     footerNote: string;
   };
-  navigation: NavItem[];
-  pages: SitePage[];
+  pages: readonly SitePage[];
 }
