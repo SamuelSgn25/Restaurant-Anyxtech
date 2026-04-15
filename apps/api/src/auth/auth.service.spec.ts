@@ -2,8 +2,10 @@ import { RestaurantDataService } from '../data/restaurant-data.service';
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
+  const mockEventsGateway = { broadcast: jest.fn() } as any;
+
   it('returns a token and safe user payload on login', () => {
-    const service = new AuthService(new RestaurantDataService());
+    const service = new AuthService(new RestaurantDataService(mockEventsGateway));
 
     const result = service.login('admin@cactus.bj', 'Admin123!');
 
