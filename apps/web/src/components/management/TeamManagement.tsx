@@ -372,7 +372,7 @@ export function TeamManagement({
       </div>
 
       {/* Summary */}
-      <div className="bg-gradient-to-r from-gold/10 to-clay/10 rounded-[2rem] p-8 border border-gold/20">
+      <div className="bg-white rounded-[2rem] p-8 border border-forest/5 shadow-sm">
         <h3 className="font-display text-lg text-forest mb-6">👥 Résumé</h3>
         <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-4">
           <div>
