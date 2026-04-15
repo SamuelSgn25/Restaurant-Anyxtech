@@ -39,6 +39,10 @@ export class AuthService {
     return this.restaurantDataService.updateUserPassword(userId, currentPassword, newPassword);
   }
 
+  updateProfile(userId: string, payload: { name?: string; phone?: string; address?: string }) {
+    return this.restaurantDataService.updateUserProfile(userId, payload);
+  }
+
   private createToken(user: StaffUser) {
     return Buffer.from(`${user.id}:${user.role}`, 'utf8').toString('base64url');
   }
