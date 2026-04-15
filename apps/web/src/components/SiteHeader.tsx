@@ -6,13 +6,13 @@ export function SiteHeader() {
   const { user } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/40 bg-sand/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-forest/10 bg-sand shadow-md">
       <div className="section-shell flex items-center justify-between py-4">
         <Link to="/" className="space-y-1 text-forest">
           <p className="font-display text-3xl font-semibold leading-none">
             {siteContent.restaurant.name}
           </p>
-          <p className="text-xs uppercase tracking-[0.3em] text-clay">Hotel restaurant</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-clay font-bold">Hotel restaurant</p>
         </Link>
         <nav className="hidden gap-6 md:flex">
           {siteContent.pages.map((item) => (
@@ -21,8 +21,8 @@ export function SiteHeader() {
               to={item.slug}
               className={({ isActive }) =>
                 [
-                  'text-sm font-semibold transition',
-                  isActive ? 'text-clay' : 'text-forest/80 hover:text-clay'
+                  'text-sm font-bold transition',
+                  isActive ? 'text-clay' : 'text-forest hover:text-clay'
                 ].join(' ')
               }
             >
