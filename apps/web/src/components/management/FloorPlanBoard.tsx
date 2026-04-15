@@ -276,7 +276,7 @@ export function FloorPlanBoard({
                           </div>
                           <div>
                              <p className="text-lg font-bold text-forest">{activeReservation?.guestName || 'Aucun nom'}</p>
-                             <p className="text-sm text-forest/40">Réservé pour {new Date(activeReservation?.date || '').toLocaleTimeString([], { hour: '2h-digit', minute: '2h-digit'})}</p>
+                             <p className="text-sm text-forest/40">Réservé pour {new Date(activeReservation?.date || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'})}</p>
                           </div>
                        </div>
                     ) : (
