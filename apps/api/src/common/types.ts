@@ -18,6 +18,8 @@ export interface StaffUser {
   id: string;
   name: string;
   email: string;
+  phone?: string;
+  address?: string;
   password: string;
   role: UserRole;
   active: boolean;
