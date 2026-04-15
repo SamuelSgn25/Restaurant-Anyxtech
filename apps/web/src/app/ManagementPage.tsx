@@ -19,6 +19,10 @@ import {
 import { useAuth } from './AuthContext';
 import { AccountMenu, UtilityView } from '../components/management/AccountMenu';
 import { FloorPlanBoard } from '../components/management/FloorPlanBoard';
+import { FloorPlanConfig } from '../components/management/FloorPlanConfig';
+import { ServiceReservations } from '../components/management/ServiceReservations';
+import { TeamManagement } from '../components/management/TeamManagement';
+import { KitchenMenu } from '../components/management/KitchenMenu';
 import { NotificationCenter } from '../components/management/NotificationCenter';
 import { StatusBadge } from '../components/management/StatusBadge';
 import { 
@@ -53,12 +57,12 @@ export function ManagementPage() {
   const [flash, setFlash] = useState<Flash>(null);
   const [invoiceMode, setInvoiceMode] = useState<{order: Order} | null>(null);
 
-  const [profileForm, setProfileForm] = useState({ name: user?.name || '', email: user?.email || '' });
+  const [profileForm, setProfileForm] = useState({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', address: user?.address || '' });
   const [menuForm, setMenuForm] = useState<CreateMenuItemPayload>({ category: 'Plats', name: '', description: '', price: 0, available: true, tags: [], image: '' });
   const [paymentForm, setPaymentForm] = useState({ orderId: '', amount: 0, method: 'cash' });
 
   useEffect(() => {
-    if (user) setProfileForm({ name: user.name, email: user.email });
+    if (user) setProfileForm({ name: user.name, email: user.email, phone: user.phone || '', address: user.address || '' });
   }, [user]);
 
   useEffect(() => {
@@ -255,27 +259,43 @@ export function ManagementPage() {
 
             {/* Other views handled similarly... */}
             {activeView === 'kitchen' && (
-               <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-forest/5 text-center">
-                  <Package size={48} className="mx-auto text-forest/10 mb-6" />
-                  <h2 className="text-2xl font-display text-forest">Interface Cuisine & Menu</h2>
-                  <p className="mt-2 text-forest/40 max-w-md mx-auto">Gérez vos tickets en préparation et mettez à jour la carte en temps réel.</p>
-               </div>
+               <KitchenMenu
+                 kitchenTickets={kitchenTickets}
+                 menu={menu}
+                 onUpdateOrderStatus={(id, status) => api.updateOrderStatus(id, status, authToken).then(loadData)}
+                 onCreateMenuItem={(data) => api.createMenuItem(data, authToken).then(loadData)}
+                 onUpdateMenuItemAvailability={(id, available) => api.updateMenuItemAvailability(id, available, authToken).then(loadData)}
+                 onDeleteMenuItem={(id) => api.deleteMenuItem(id, authToken).then(loadData)}
+               />
             )}
 
             {activeView === 'service' && (
-               <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-forest/5 text-center">
-                  <Users size={48} className="mx-auto text-forest/10 mb-6" />
-                  <h2 className="text-2xl font-display text-forest">Service & Réservations</h2>
-                  <p className="mt-2 text-forest/40 max-w-md mx-auto">Gérez les réservations et le suivi du service en salle.</p>
-               </div>
+               <ServiceReservations
+                 reservations={reservations}
+                 tables={tables}
+                 orders={orders}
+                 payments={payments}
+                 onReservationStatusChange={(id, status) => api.updateReservationStatus(id, status, authToken).then(loadData)}
+                 onAssignTable={(resId, tableId) => api.assignReservationTable(resId, tableId, authToken).then(loadData)}
+                 onTableStatusChange={(tableId, status) => api.updateTableStatus(tableId, status, authToken).then(loadData)}
+                 onCreatePayment={(orderId, amount) => api.createPayment({ orderId, amount, method: 'cash', processedBy: user.id }, authToken).then(loadData)}
+               />
             )}
 
-            {activeView === 'team' && (
-               <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-forest/5 text-center">
-                  <Users size={48} className="mx-auto text-forest/10 mb-6" />
-                  <h2 className="text-2xl font-display text-forest">Équipe</h2>
-                  <p className="mt-2 text-forest/40 max-w-md mx-auto">Gérez votre équipe et les permissions d'accès.</p>
-               </div>
+            {activeView === 'team' && user && (
+               <TeamManagement
+                 staff={staff}
+                 currentUser={user}
+                 onCreateStaff={(data) => api.createStaff(data, authToken).then(loadData)}
+                 onUpdateStaff={(id, data) => api.updateStaff(id, data, authToken).then(loadData)}
+                 onDeleteStaff={(id) => {
+                   if (confirm('Êtes-vous sûr ?')) {
+                     return api.deleteStaff(id, authToken).then(loadData)
+                   }
+                   return Promise.resolve()
+                 }}
+                 onResetPassword={(id, password) => api.resetPassword(id, password, authToken)}
+               />
             )}
 
             {activeView === 'cashier' && (
@@ -351,44 +371,204 @@ export function ManagementPage() {
             )}
             
             {utilityView === 'profile' && (
-               <div className="bg-white rounded-[2.5rem] p-12 shadow-sm border border-forest/5 max-w-3xl">
-                  <h2 className="text-3xl font-display text-forest mb-2">Mon Profil</h2>
-                  <p className="text-forest/40 mb-8">Gérez vos informations personnelles et vos préférences.</p>
-                  <form className="space-y-6" onSubmit={e => { e.preventDefault(); refreshUser(); }}>
-                     <div className="grid sm:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                           <label className="text-xs font-bold uppercase tracking-widest text-forest/40 ml-2">Nom Complet</label>
-                           <input value={profileForm.name} onChange={e => setProfileForm({...profileForm, name: e.target.value})} className="w-full bg-[#f8f5f0] border-none rounded-2xl p-4 font-bold text-sm outline-none" />
-                        </div>
-                        <div className="space-y-2">
-                           <label className="text-xs font-bold uppercase tracking-widest text-forest/40 ml-2">Fonction</label>
-                           <input value={user.role} readOnly className="w-full bg-[#f8f5f0]/50 border-none rounded-2xl p-4 font-bold text-sm outline-none cursor-not-allowed text-forest/30" />
-                        </div>
+               <div className="bg-white rounded-[2.5rem] p-12 shadow-sm border border-forest/5 max-w-4xl">
+                  <div className="flex justify-between items-start mb-12 pb-8 border-b border-forest/5">
+                     <div>
+                        <h2 className="text-3xl font-display text-forest mb-2">Mon Profil</h2>
+                        <p className="text-forest/40">Gérez vos informations personnelles et vos coordonnées.</p>
                      </div>
-                     <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-widest text-forest/40 ml-2">Email Professionnel</label>
-                        <input value={profileForm.email} readOnly className="w-full bg-[#f8f5f0]/50 border-none rounded-2xl p-4 font-bold text-sm outline-none cursor-not-allowed text-forest/30" />
+                     <div className="text-right">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-forest/30">Fonction</p>
+                        <p className="text-xl font-display text-forest capitalize mt-1">{user.role === 'super_admin' ? 'Direction Générale' : user.role === 'admin' ? 'Gérant' : user.role === 'server' ? 'Serveur' : user.role === 'chef' ? 'Chef de Cuisine' : 'Caissier'}</p>
                      </div>
-                     <button type="submit" className="px-10 py-4 rounded-full bg-gold text-forest font-bold uppercase tracking-widest shadow-lg shadow-gold/20 hover:scale-105 transition-all">
-                        Sauvegarder
-                     </button>
+                  </div>
+                  
+                  <form className="space-y-8" onSubmit={async (e) => { 
+                     e.preventDefault(); 
+                     const result = await api.updateProfile({ name: profileForm.name, phone: profileForm.phone, address: profileForm.address }, authToken);
+                     if (result) {
+                       await refreshUser();
+                       setFlash({ type: 'success', text: 'Profil mis à jour avec succès' });
+                     }
+                  }}>
+                     {/* Section Informations Identité */}
+                     <fieldset className="space-y-4 pb-8 border-b border-forest/5">
+                        <legend className="text-xs font-black uppercase tracking-[0.3em] text-forest/40 mb-6">📋 Identité</legend>
+                        <div className="grid sm:grid-cols-2 gap-6">
+                           <div className="space-y-2">
+                              <label className="text-xs font-bold uppercase tracking-widest text-forest/40 ml-2 flex items-center gap-2">
+                                 <CheckCircle2 size={14} className="text-emerald-500" />
+                                 Nom Complet
+                              </label>
+                              <input 
+                                 value={profileForm.name} 
+                                 onChange={e => setProfileForm({...profileForm, name: e.target.value})} 
+                                 placeholder="Votre nom complet"
+                                 className="w-full bg-gradient-to-r from-[#f8f5f0] to-white border border-forest/5 rounded-2xl p-4 font-bold text-sm outline-none focus:ring-2 ring-gold transition-all" 
+                              />
+                           </div>
+                           <div className="space-y-2">
+                              <label className="text-xs font-bold uppercase tracking-widest text-forest/40 ml-2 flex items-center gap-2">
+                                 <CheckCircle2 size={14} className="text-emerald-500" />
+                                 Email Professionnel
+                              </label>
+                              <input 
+                                 value={profileForm.email} 
+                                 readOnly 
+                                 className="w-full bg-[#f8f5f0]/50 border border-forest/5 rounded-2xl p-4 font-bold text-sm outline-none cursor-not-allowed text-forest/30" 
+                              />
+                           </div>
+                        </div>
+                     </fieldset>
+
+                     {/* Section Coordonnées */}
+                     <fieldset className="space-y-4 pb-8 border-b border-forest/5">
+                        <legend className="text-xs font-black uppercase tracking-[0.3em] text-forest/40 mb-6">📞 Coordonnées</legend>
+                        <div className="grid sm:grid-cols-2 gap-6">
+                           <div className="space-y-2">
+                              <label className="text-xs font-bold uppercase tracking-widest text-forest/40 ml-2">Téléphone</label>
+                              <input 
+                                 type="tel"
+                                 value={profileForm.phone} 
+                                 onChange={e => setProfileForm({...profileForm, phone: e.target.value})} 
+                                 placeholder="+229 XX XX XX XX"
+                                 className="w-full bg-gradient-to-r from-[#f8f5f0] to-white border border-forest/5 rounded-2xl p-4 font-bold text-sm outline-none focus:ring-2 ring-gold transition-all" 
+                              />
+                           </div>
+                           <div className="space-y-2">
+                              <label className="text-xs font-bold uppercase tracking-widest text-forest/40 ml-2">Adresse</label>
+                              <input 
+                                 value={profileForm.address} 
+                                 onChange={e => setProfileForm({...profileForm, address: e.target.value})} 
+                                 placeholder="Votre adresse complète"
+                                 className="w-full bg-gradient-to-r from-[#f8f5f0] to-white border border-forest/5 rounded-2xl p-4 font-bold text-sm outline-none focus:ring-2 ring-gold transition-all" 
+                              />
+                           </div>
+                        </div>
+                     </fieldset>
+
+                     {/* Action Buttons */}
+                     <div className="flex gap-4 pt-4">
+                        <button 
+                           type="submit" 
+                           className="flex-1 py-4 rounded-full bg-gradient-to-r from-gold to-clay text-forest font-black uppercase tracking-widest shadow-lg shadow-gold/20 hover:scale-105 active:scale-95 transition-all"
+                        >
+                           ✓ Enregistrer les modifications
+                        </button>
+                        <button 
+                           type="button"
+                           onClick={() => setProfileForm({ name: user.name, email: user.email, phone: user.phone || '', address: user.address || '' })}
+                           className="px-8 py-4 rounded-full border-2 border-forest/20 text-forest font-bold uppercase tracking-widest hover:bg-forest/5 transition-all"
+                        >
+                           Annuler
+                        </button>
+                     </div>
                   </form>
                </div>
             )}
 
             {utilityView === 'settings' && (
-               <div className="bg-white rounded-[2.5rem] p-12 shadow-sm border border-forest/5 max-w-3xl">
-                  <h2 className="text-3xl font-display text-forest mb-2">Paramètres</h2>
-                  <p className="text-forest/40 mb-8">Configurez les paramètres de votre établissement.</p>
-                  <div className="space-y-6">
-                     <div className="p-6 rounded-2xl bg-sand/30 border border-forest/5">
-                        <h3 className="font-bold text-forest mb-2">Informations Générales</h3>
-                        <p className="text-sm text-forest/40">Nom établissement: Hotel Cactus</p>
+               <div className="bg-white rounded-[2.5rem] p-12 shadow-sm border border-forest/5 max-w-4xl">
+                  <h2 className="text-3xl font-display text-forest mb-2">⚙️ Paramètres</h2>
+                  <p className="text-forest/40 mb-12">Configurez les préférences de votre établissement et vos permissions.</p>
+                  
+                  <div className="grid gap-8">
+                     {/* Restaurant Settings */}
+                     <div className="space-y-6 pb-8 border-b border-forest/5">
+                        <h3 className="text-xl font-display text-forest flex items-center gap-2">
+                           🏪 Informations Établissement
+                        </h3>
+                        <div className="grid sm:grid-cols-2 gap-6">
+                           <div className="space-y-2">
+                              <label className="text-xs font-bold uppercase tracking-widest text-forest/40">Nom du Restaurant</label>
+                              <input readOnly value="Hotel Cactus" className="w-full bg-[#f8f5f0]/50 border border-forest/5 rounded-2xl p-4 text-sm font-bold text-forest/40 cursor-not-allowed" />
+                           </div>
+                           <div className="space-y-2">
+                              <label className="text-xs font-bold uppercase tracking-widest text-forest/40">Lieu / Ville</label>
+                              <input readOnly value="Cotonou, Bénin" className="w-full bg-[#f8f5f0]/50 border border-forest/5 rounded-2xl p-4 text-sm font-bold text-forest/40 cursor-not-allowed" />
+                           </div>
+                        </div>
+                        <div className="space-y-2">
+                           <label className="text-xs font-bold uppercase tracking-widest text-forest/40">Zone Active</label>
+                           <input placeholder="Ex: Salle à manger, Terrasse..." className="w-full bg-gradient-to-r from-[#f8f5f0] to-white border border-forest/5 rounded-2xl p-4 text-sm outline-none focus:ring-2 ring-gold" />
+                        </div>
                      </div>
-                     <div className="p-6 rounded-2xl bg-sand/30 border border-forest/5">
-                        <h3 className="font-bold text-forest mb-2">Préférences</h3>
-                        <p className="text-sm text-forest/40">Configuration des paramètres personnalisés</p>
+
+                     {/* Preferences */}
+                     <div className="space-y-6 pb-8 border-b border-forest/5">
+                        <h3 className="text-xl font-display text-forest flex items-center gap-2">
+                           🔔 Notifications & Alertes
+                        </h3>
+                        <div className="space-y-4">
+                           {[
+                              { label: 'Alertes de résservation', desc: 'Recevoir une notification pour chaque nouvelle réservation' },
+                              { label: 'Alertes de commande', desc: 'Notifié quand un ticket rentre en cuisine' },
+                              { label: 'Alertes de paiement', desc: 'Confirmation demandes encaissement' },
+                              { label: 'Alertes équipe', desc: 'Notification sur arrivée/départ du staff' }
+                           ].map((item, i) => (
+                              <label key={i} className="flex items-center gap-3 p-4 rounded-xl border border-forest/5 hover:bg-forest/2 cursor-pointer transition-all">
+                                 <input type="checkbox" defaultChecked className="w-5 h-5 rounded border-forest/20 text-gold accent-gold" />
+                                 <span className="flex-1">
+                                    <p className="font-bold text-forest text-sm">{item.label}</p>
+                                    <p className="text-xs text-forest/40">{item.desc}</p>
+                                 </span>
+                              </label>
+                           ))}
+                        </div>
                      </div>
+
+                     {/* Permissions by Role */}
+                     <div className="space-y-6">
+                        <h3 className="text-xl font-display text-forest flex items-center gap-2">
+                           🔐 Accès et Permissions
+                        </h3>
+                        <div className="bg-sand/20 rounded-2xl p-6 border border-forest/5">
+                           <p className="text-sm font-bold text-forest mb-4">
+                              Votre profil: <span className="text-gold capitalize">{user.role === 'super_admin' ? 'Direction Générale' : user.role === 'admin' ? 'Gérant' : user.role === 'server' ? 'Serveur' : user.role === 'chef' ? 'Chef de Cuisine' : 'Caissier'}</span>
+                           </p>
+                           <div className="grid gap-2 text-xs text-forest/60">
+                              {user.role === 'super_admin' ? (
+                                 <>
+                                    <p>✓ Accès complet à tous les modules</p>
+                                    <p>✓ Gestion des administrateurs</p>
+                                    <p>✓ Configuration système</p>
+                                    <p>✓ Rapports financiers complets</p>
+                                 </>
+                              ) : user.role === 'admin' ? (
+                                 <>
+                                    <p>✓ Gestion complète du restaurant</p>
+                                    <p>✓ Création/suppression d'équipes</p>
+                                    <p>✓ Gestion menu et tables</p>
+                                    <p>✓ Suivi des commandes</p>
+                                 </>
+                              ) : user.role === 'server' ? (
+                                 <>
+                                    <p>✓ Gestion réservations</p>
+                                    <p>✓ Prise de commandes</p>
+                                    <p>✓ Consultation menu</p>
+                                 </>
+                              ) : user.role === 'chef' ? (
+                                 <>
+                                    <p>✓ Accès aux tickets cuisine</p>
+                                    <p>✓ Gestion des stocks</p>
+                                    <p>✓ Modification menu/disponibilité</p>
+                                 </>
+                              ) : (
+                                 <>
+                                    <p>✓ Enregistrement paiements</p>
+                                    <p>✓ Générations factures</p>
+                                    <p>✓ Consultation commandes</p>
+                                 </>
+                              )}
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="flex gap-4 mt-12 pt-8 border-t border-forest/5">
+                     <button className="flex-1 py-4 rounded-full bg-gradient-to-r from-gold to-clay text-forest font-black uppercase tracking-widest shadow-lg shadow-gold/20 hover:scale-105 active:scale-95 transition-all">
+                        Sauvegarder les paramètres
+                     </button>
                   </div>
                </div>
             )}
