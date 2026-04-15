@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import { AuthProvider } from './AuthContext';
@@ -14,7 +14,10 @@ describe('App', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText('Le Cactus')).toBeInTheDocument();
+    // Check for header branding by looking for "Le Cactus" with "Hotel restaurant" using function matcher
+    const allCactusElements = screen.getAllByText('Le Cactus');
+    expect(allCactusElements.length).toBeGreaterThan(0);
+    
     expect(screen.getByText(/Hotel restaurant/i)).toBeInTheDocument();
     expect(
       screen.getByText(/Une Odyssée culinaire entre Terre et Mer/i)
