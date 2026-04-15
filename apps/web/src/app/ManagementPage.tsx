@@ -276,6 +276,9 @@ export function ManagementPage() {
                 onReservationDrop={(rid, tid) => api.assignReservationTable(rid, tid, authToken).then(loadData)}
                 onOrderDrop={(oid, tid) => api.moveOrderTable(oid, tid, authToken).then(loadData)}
                 onStatusChange={(tid, s) => api.updateTableStatus(tid, s, authToken).then(loadData)}
+                onUpdateTablePosition={(tid, posX, posY) => api.updateTable(tid, { posX, posY }, authToken).then(loadData)}
+                menu={menu}
+                onCreateOrder={(payload) => api.createOrder({ ...payload, serverId: user.id }, authToken).then(loadData)}
                />
             )}
 
@@ -297,10 +300,13 @@ export function ManagementPage() {
                  tables={tables}
                  orders={orders}
                  payments={payments}
+                 menu={menu}
                  onReservationStatusChange={(id, status) => api.updateReservationStatus(id, status, authToken).then(loadData)}
                  onAssignTable={(resId, tableId) => api.assignReservationTable(resId, tableId, authToken).then(loadData)}
                  onTableStatusChange={(tableId, status) => api.updateTableStatus(tableId, status, authToken).then(loadData)}
                  onCreatePayment={(orderId, amount) => api.createPayment({ orderId, amount, method: 'cash', processedBy: user.id }, authToken).then(loadData)}
+                 onCreateOrder={(payload) => api.createOrder({ ...payload, serverId: user.id }, authToken).then(loadData)}
+                 onUpdateOrderStatus={(id, status) => api.updateOrderStatus(id, status, authToken).then(loadData)}
                />
             )}
 
@@ -674,7 +680,7 @@ export function ManagementPage() {
 
                  <div className="mt-12 flex gap-4">
                     <button onClick={() => { window.print(); setInvoiceMode(null); }} className="flex-1 py-5 rounded-2xl bg-forest text-white font-bold uppercase tracking-widest text-xs shadow-xl shadow-forest/20 hover:scale-[1.02] transition-all">
-                       Imprimer la Note
+                       Télécharger / Imprimer la facture
                     </button>
                     <button onClick={() => setInvoiceMode(null)} className="flex-1 py-5 rounded-2xl border border-forest/10 text-forest font-bold uppercase tracking-widest text-xs hover:bg-forest/5 transition-all">
                        Fermer
