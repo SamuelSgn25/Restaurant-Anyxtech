@@ -262,6 +262,22 @@ export function ManagementPage() {
                </div>
             )}
 
+            {activeView === 'service' && (
+               <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-forest/5 text-center">
+                  <Users size={48} className="mx-auto text-forest/10 mb-6" />
+                  <h2 className="text-2xl font-display text-forest">Service & Réservations</h2>
+                  <p className="mt-2 text-forest/40 max-w-md mx-auto">Gérez les réservations et le suivi du service en salle.</p>
+               </div>
+            )}
+
+            {activeView === 'team' && (
+               <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-forest/5 text-center">
+                  <Users size={48} className="mx-auto text-forest/10 mb-6" />
+                  <h2 className="text-2xl font-display text-forest">Équipe</h2>
+                  <p className="mt-2 text-forest/40 max-w-md mx-auto">Gérez votre équipe et les permissions d'accès.</p>
+               </div>
+            )}
+
             {activeView === 'cashier' && (
               <div className="space-y-8">
                 <div className="flex justify-between items-center">
@@ -357,6 +373,23 @@ export function ManagementPage() {
                         Sauvegarder
                      </button>
                   </form>
+               </div>
+            )}
+
+            {utilityView === 'settings' && (
+               <div className="bg-white rounded-[2.5rem] p-12 shadow-sm border border-forest/5 max-w-3xl">
+                  <h2 className="text-3xl font-display text-forest mb-2">Paramètres</h2>
+                  <p className="text-forest/40 mb-8">Configurez les paramètres de votre établissement.</p>
+                  <div className="space-y-6">
+                     <div className="p-6 rounded-2xl bg-sand/30 border border-forest/5">
+                        <h3 className="font-bold text-forest mb-2">Informations Générales</h3>
+                        <p className="text-sm text-forest/40">Nom établissement: Hotel Cactus</p>
+                     </div>
+                     <div className="p-6 rounded-2xl bg-sand/30 border border-forest/5">
+                        <h3 className="font-bold text-forest mb-2">Préférences</h3>
+                        <p className="text-sm text-forest/40">Configuration des paramètres personnalisés</p>
+                     </div>
+                  </div>
                </div>
             )}
           </div>
