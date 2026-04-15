@@ -15,12 +15,12 @@ interface KitchenMenuProps {
 }
 
 const ORDER_STATUSES = [
-  { status: 'draft', label: '📝 Brouillon', color: 'bg-slate-100 text-slate-700' },
-  { status: 'sent_to_kitchen', label: '👨‍🍳 Envoyée', color: 'bg-blue-100 text-blue-700' },
-  { status: 'in_preparation', label: '🍳 En Préparation', color: 'bg-orange-100 text-orange-700' },
-  { status: 'ready', label: '✓ Prête', color: 'bg-emerald-100 text-emerald-700' },
-  { status: 'served', label: '🍽️ Servée', color: 'bg-purple-100 text-purple-700' },
-  { status: 'closed', label: '✓ Fermée', color: 'bg-slate-100 text-slate-700' }
+  { status: 'draft', label: '📝 Brouillon', color: 'bg-forest/5 text-forest/50' },
+  { status: 'sent_to_kitchen', label: '👨‍🍳 Envoyée', color: 'bg-forest/10 text-forest/60' },
+  { status: 'in_preparation', label: '🍳 En Préparation', color: 'bg-clay/10 text-clay/80' },
+  { status: 'ready', label: '✓ Prête', color: 'bg-gold/10 text-gold' },
+  { status: 'served', label: '🍽️ Servée', color: 'bg-forest/5 text-forest/40' },
+  { status: 'closed', label: '✓ Fermée', color: 'bg-forest/3 text-forest/30' }
 ];
 
 export function KitchenMenu({
