@@ -1,4 +1,4 @@
-import { Bell, X, Check, Info, AlertTriangle, CreditCard, Utensils, Zap, Sparkles, Clock, Trash2, Archive } from 'lucide-react';
+import { Bell, X, Check, Info, AlertTriangle, CreditCard, Utensils, Zap, Sparkles, Clock, Trash2, Archive, CheckCheck } from 'lucide-react';
 import { NotificationItem } from '../../types/management';
 
 function NotificationIcon({ type }: { type: NotificationItem['type'] }) {
@@ -16,12 +16,16 @@ export function NotificationCenter({
   notifications,
   open,
   onToggle,
-  onRead
+  onRead,
+  onReadAll,
+  onNavigate
 }: {
   notifications: NotificationItem[];
   open: boolean;
   onToggle: () => void;
   onRead: (id: string) => void;
+  onReadAll?: () => void;
+  onNavigate?: (type: string, notifId: string) => void;
 }) {
   const unreadCount = notifications.filter((n) => !n.read).length;
   const sortedNotifs = [...notifications].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -75,8 +79,13 @@ export function NotificationCenter({
                   {sortedNotifs.map((notif, idx) => (
                     <div
                       key={notif.id}
+                      onClick={() => {
+                        if (!notif.read) onRead(notif.id);
+                        if (onNavigate) onNavigate(notif.type, notif.id);
+                        onToggle();
+                      }}
                       className={[
-                        'group relative flex gap-4 px-6 py-5 transition-all duration-200 hover:bg-forest/2',
+                        'group relative flex gap-4 px-6 py-5 transition-all duration-200 hover:bg-forest/2 cursor-pointer',
                         notif.read ? 'opacity-50' : 'bg-gold/5 hover:bg-gold/8'
                       ].join(' ')}
                     >
@@ -99,13 +108,9 @@ export function NotificationCenter({
                       </div>
                       
                       {!notif.read && (
-                        <button
-                          onClick={() => onRead(notif.id)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-emerald-500/20 text-emerald-600 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:bg-emerald-500 hover:text-white"
-                          title="Marquer comme lu"
-                        >
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-emerald-500/20 text-emerald-600 flex items-center justify-center">
                           <Check size={16} />
-                        </button>
+                        </div>
                       )}
                     </div>
                   ))}
@@ -115,15 +120,26 @@ export function NotificationCenter({
 
             {/* Footer */}
             {sortedNotifs.length > 0 && (
-               <div className="sticky bottom-0 px-6 py-4 border-t border-forest/5 bg-grad from-white/50 to-white flex gap-2 justify-end">
-                  <button className="p-2 rounded-lg text-forest/40 hover:text-forest hover:bg-forest/5 transition-all text-sm font-bold flex items-center gap-2">
-                    <Archive size={14} />
-                    <span className="hidden sm:inline">Archiver</span>
-                  </button>
-                  <button className="p-2 rounded-lg text-rose-400/60 hover:text-rose-600 hover:bg-rose-500/5 transition-all text-sm font-bold flex items-center gap-2">
-                    <Trash2 size={14} />
-                    <span className="hidden sm:inline">Effacer</span>
-                  </button>
+               <div className="sticky bottom-0 px-6 py-4 border-t border-forest/5 bg-grad from-white/50 to-white flex gap-2 justify-between">
+                  {unreadCount > 0 && (
+                    <button 
+                      onClick={() => onReadAll?.()}
+                      className="p-2 rounded-lg text-emerald-600/60 hover:text-emerald-600 hover:bg-emerald-500/5 transition-all text-sm font-bold flex items-center gap-2"
+                    >
+                      <CheckCheck size={14} />
+                      <span className="hidden sm:inline">Tout marquer comme lu</span>
+                    </button>
+                  )}
+                  <div className="flex gap-2 ml-auto">
+                    <button className="p-2 rounded-lg text-forest/40 hover:text-forest hover:bg-forest/5 transition-all text-sm font-bold flex items-center gap-2">
+                      <Archive size={14} />
+                      <span className="hidden sm:inline">Archiver</span>
+                    </button>
+                    <button className="p-2 rounded-lg text-rose-400/60 hover:text-rose-600 hover:bg-rose-500/5 transition-all text-sm font-bold flex items-center gap-2">
+                      <Trash2 size={14} />
+                      <span className="hidden sm:inline">Effacer</span>
+                    </button>
+                  </div>
                </div>
             )}
           </div>
