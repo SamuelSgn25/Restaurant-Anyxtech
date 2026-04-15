@@ -12,11 +12,13 @@ interface FloorPlanProps {
   reservations: Reservation[];
   orders: Order[];
   selectedTableId: string | null;
+  token?: string;
   onSelect: (id: string) => void;
   onReservationDrop: (reservationId: string, tableId: string) => void;
   onOrderDrop: (orderId: string, tableId: string) => void;
   onStatusChange?: (tableId: string, status: TableStatus) => void;
   onUpdateTablePosition?: (tableId: string, posX: number, posY: number) => void;
+  onLoadData?: () => void;
 }
 
 export function FloorPlanBoard({
@@ -24,11 +26,13 @@ export function FloorPlanBoard({
   reservations,
   orders,
   selectedTableId,
+  token,
   onSelect,
   onReservationDrop,
   onOrderDrop,
   onStatusChange,
-  onUpdateTablePosition
+  onUpdateTablePosition,
+  onLoadData
 }: FloorPlanProps) {
   const [activeZone, setActiveZone] = useState('Salle principale');
   const [isEditMode, setIsEditMode] = useState(false);
@@ -72,7 +76,7 @@ export function FloorPlanBoard({
       {configMode ? (
         <div className="p-8 bg-white rounded-[2.5rem] border border-forest/5 shadow-xl">
           <div className="flex justify-between items-center mb-8">
-            <FloorPlanConfig />
+            <FloorPlanConfig token={token} onSave={() => { onLoadData?.(); setConfigMode(false); }} />
             <button
               onClick={() => setConfigMode(false)}
               className="absolute top-12 right-12 p-3 rounded-full border border-forest/10 hover:bg-forest/5"
