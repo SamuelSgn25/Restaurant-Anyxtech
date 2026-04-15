@@ -1,126 +1,50 @@
-# Restaurant Hotel Cactus
+# 🌵 Restaurant Management Platform - Hotel Cactus
 
-Plateforme modulaire complete pour le restaurant de l'Hotel Cactus, avec site public React + Tailwind et back office restaurant connecte a une API NestJS.
+Une plateforme de gestion hôtelière et de restauration premium, conçue pour l'excellence opérationnelle et l'élégance visuelle.
 
-## Stack
+## 🚀 Fonctionnalités Clés
 
-- Frontend: React, Vite, Tailwind CSS, Vitest
-- Backend: NestJS, TypeScript, validation DTO, architecture prete pour PostgreSQL
-- CI: GitHub Actions
-- Architecture: monorepo npm workspaces
+### 1. Interface de Gestion (Dashboard)
+- **Tableau de Bord Holistique** : Suivi du chiffre d'affaires journalier, des commandes actives et du flux staff dans une vue unifiée.
+- **Plan de Salle Interactif 2.0** : Vue graphique dynamique des zones (Salle, Terrasse, VIP) avec support du Glisser-Déposer (Drag & Drop) pour les réservations et commandes.
+- **Real-Time Data Sync** : Synchronisation toutes les 5 secondes pour une réactivité absolue en plein service.
+- **Centre de Notifications Premium** : Alertes visuelles et sonores pour les nouvelles réservations, les commandes prêtes et les encaissements réussis.
 
-## Ce qui est maintenant en place
+### 2. Expérience Client & Service
+- **Menu Digital Vivant** : Support complet des images haute résolution pour les plats, facilitant la vente visuelle.
+- **Gestion de la Caisse & Invoicing** : Module d'encaissement sécurisé avec génération de factures professionnelles ("Note de Détails") prêtes à l'impression.
+- **Réservations Intelligentes** : Système de filtrage et d'attribution automatique des tables.
 
-### Site public
+### 3. Sécurité & Design
+- **Authentification Glassmorphique** : Page de connexion moderne et ultra-sécurisée avec gestion des rôles (Super Admin, Admin, Chef, Serveur, Caissier).
+- **Design Adaptatif (Responsive)** : Utilisabilité totale sur Tablettes (pour le service en salle) et Desktop (pour l'administration).
 
-- pages vitrine du restaurant
-- univers premium inspire de l'Hotel Cactus
-- structure modulaire par sections reutilisables
+## 🛠 Stack Technique
 
-### Back office restaurant
+- **Frontend** : React 18, Tailwind CSS (Glassmorphism), Lucide Icons, Vite.
+- **Backend** : NestJS, Prisma ORM.
+- **Database** : PostgreSQL.
+- **UI/UX** : Design system basé sur les couleurs signature : #0F1D18 (Forest), #D8A25E (Gold).
 
-- login multi-roles
-- dashboard interactif
-- gestion des tables avec statut d'occupation
-- gestion des reservations
-- creation et suivi des commandes clients
-- file cuisine pour le chef
-- role dedie a la caisse
-- gestion de disponibilite du menu
-- liste des comptes staff pour les roles direction
+## 📖 Guide de Démarrage
 
-## Roles disponibles
+### Prérequis
+- Node.js (v18+)
+- PostgreSQL
 
-- `super_admin`
-- `admin`
-- `server`
-- `chef`
-- `cashier`
+### Installation
+1. Clonez le dépôt.
+2. Installez les dépendances : `npm install`.
+3. Configurez les variables d'environnement (`.env`) pour le backend API.
+4. Lancez le mode développement : `npm run dev`.
 
-## Comptes de demonstration
+---
 
-- Super admin: `superadmin@cactus.bj` / `SuperAdmin123!`
-- Super admin 2: `superadmin2@cactus.bj` / `SuperAdmin456!`
-- Administrateur: `admin@cactus.bj` / `Admin123!`
-- Administrateur 2: `admin2@cactus.bj` / `Admin456!`
-- Serveur: `server@cactus.bj` / `Server123!`
-- Serveur 2: `server2@cactus.bj` / `Server456!`
-- Chef de cuisine: `chef@cactus.bj` / `Chef123!`
-- Caissier: `cashier@cactus.bj` / `Cashier123!`
+## 📅 Roadmap & Évolutions
+- [x] Refonte graphique du plan de salle (Drag & Drop).
+- [x] Système de facturation professionnelle.
+- [x] Dashboard de revenus analytique.
+- [ ] Intégration de paiements mobiles directs.
+- [ ] Module de gestion de stock en temps réel.
 
-## Lancer le projet
-
-```bash
-npm install
-npm run dev:api
-npm run dev:web
-```
-
-- Frontend: `http://localhost:5173`
-- Back office login: `http://localhost:5173/login`
-- API: `http://localhost:3001/api`
-
-## PostgreSQL
-
-Un script SQL de reference est maintenant disponible dans [db/init.sql](/home/samuelsgn/Restaurant-Anyxtech/db/init.sql).
-
-Le backend peut tourner sans PostgreSQL avec des donnees seed en memoire. Pour preparer la base de donnees:
-
-```bash
-psql -U postgres -f db/init.sql
-```
-
-Variables d'environnement pour la connexion:
-
-```bash
-ENABLE_DB=true
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_NAME=hotel_cactus_restaurant
-```
-
-## Guide de test complet
-
-La procedure complete de verification fonctionnelle et technique est detaillee dans [testing-guide.md](/home/samuelsgn/Restaurant-Anyxtech/docs/testing-guide.md).
-
-## Endpoints principaux
-
-### Public
-
-- `POST /api/auth/login`
-- `GET /api/menu`
-- `POST /api/reservations`
-
-### Proteges
-
-- `GET /api/auth/me`
-- `GET /api/dashboard/summary`
-- `GET /api/tables`
-- `PATCH /api/tables/:id/status`
-- `GET /api/reservations`
-- `PATCH /api/reservations/:id/status`
-- `GET /api/orders`
-- `POST /api/orders`
-- `PATCH /api/orders/:id/status`
-- `GET /api/kitchen/tickets`
-- `PATCH /api/kitchen/tickets/:id/status`
-- `GET /api/payments`
-- `POST /api/payments`
-- `GET /api/staff`
-- `PATCH /api/menu/:id/availability`
-
-## Scripts utiles
-
-```bash
-npm test
-npm run lint
-npm run build
-```
-
-## Notes d'architecture
-
-- Le site public et le back office vivent dans la meme application frontend mais sur des routes separees.
-- Le backend est decoupe par domaines: auth, reservations, tables, orders, kitchen, payments, dashboard, staff.
-- Le schema SQL represente la cible PostgreSQL a brancher pour la prochaine iteration TypeORM complete.
+© 2026 Hôtel Cactus. Développé pour l'excellence hôtelière au Bénin.
