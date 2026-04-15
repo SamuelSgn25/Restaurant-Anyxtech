@@ -110,7 +110,7 @@ export function KitchenMenu({
             onClick={() => setActiveTab('kitchen')}
             className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
               activeTab === 'kitchen'
-                ? 'bg-gold text-forest shadow-lg shadow-gold/20'
+                ? 'bg-forest text-white shadow-lg'
                 : 'text-forest/40 hover:text-forest'
             }`}
           >
@@ -120,7 +120,7 @@ export function KitchenMenu({
             onClick={() => setActiveTab('menu')}
             className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
               activeTab === 'menu'
-                ? 'bg-gold text-forest shadow-lg shadow-gold/20'
+                ? 'bg-forest text-white shadow-lg'
                 : 'text-forest/40 hover:text-forest'
             }`}
           >
