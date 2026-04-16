@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Users, Clock, User, ChevronRight, X, LayoutGrid, 
   MapPin, Maximize2, Move, Layout, CheckCircle2, 
@@ -41,6 +41,14 @@ export function FloorPlanBoard({
   const [activeZone, setActiveZone] = useState('Salle principale');
   const [isEditMode, setIsEditMode] = useState(false);
   const [detailsModal, setDetailsModal] = useState<string | null>(null);
+  
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dragTableId, setDragTableId] = useState<string | null>(null);
+  const [orderCart, setOrderCart] = useState<{ id: string, name: string, price: number, qty: number }[]>([]);
+
+  useEffect(() => {
+    if (!detailsModal) setOrderCart([]);
+  }, [detailsModal]);
   const [configMode, setConfigMode] = useState(false);
 
   const zones = useMemo(() => Array.from(new Set(tables.map((t) => t.zone))), [tables]);
@@ -72,7 +80,10 @@ export function FloorPlanBoard({
   };
 
   const selectedTable = useMemo(() => tables.find((t) => t.id === detailsModal), [tables, detailsModal]);
-  const activeOrder = useMemo(() => orders.find((o) => o.tableId === detailsModal), [orders, detailsModal]);
+  const activeOrders = useMemo(() => orders.filter((o) => o.tableId === detailsModal && o.status !== 'closed'), [orders, detailsModal]);
+  const firstOrderCreatedAt = activeOrders[0]?.createdAt || new Date().toISOString();
+  const aggregatedItems = activeOrders.flatMap(o => o.items);
+  const totalAdditif = activeOrders.reduce((sum, o) => sum + o.total, 0);
   const activeReservation = useMemo(() => reservations.find((r) => r.tableId === detailsModal), [reservations, detailsModal]);
 
   return (
@@ -175,7 +186,32 @@ export function FloorPlanBoard({
         </aside>
 
         {/* Main Floor Grid */}
-        <div className="flex-1 relative p-12 overflow-hidden bg-[radial-gradient(#13261f_1px,transparent_1px)] bg-[size:40px_40px] bg-opacity-[0.02]">
+        <div 
+         ref={containerRef}
+         className="flex-1 relative p-12 overflow-hidden bg-[radial-gradient(#13261f_1px,transparent_1px)] bg-[size:40px_40px] bg-opacity-[0.02]"
+         onPointerMove={(e) => {
+            if(!isEditMode || !dragTableId || !containerRef.current) return;
+            const parent = containerRef.current.getBoundingClientRect();
+            const rawX = ((e.clientX - parent.left) / parent.width) * 100;
+            const rawY = ((e.clientY - parent.top) / parent.height) * 100;
+            const tableEl = document.getElementById(`table-${dragTableId}`);
+            if (tableEl) {
+               tableEl.style.left = `${Math.max(0, Math.min(100 - 6, rawX))}%`;
+               tableEl.style.top = `${Math.max(0, Math.min(100 - 6, rawY))}%`;
+            }
+         }}
+         onPointerUp={(e) => {
+            if(!isEditMode || !dragTableId || !containerRef.current) return;
+            const parent = containerRef.current.getBoundingClientRect();
+            const rawX = ((e.clientX - parent.left) / parent.width) * 100;
+            const rawY = ((e.clientY - parent.top) / parent.height) * 100;
+            setDragTableId(null);
+            if(onUpdateTablePosition) onUpdateTablePosition(dragTableId, Math.max(0, Math.min(100 - 6, rawX)), Math.max(0, Math.min(100 - 6, rawY)));
+         }}
+         onPointerLeave={() => {
+            if(isEditMode && dragTableId) setDragTableId(null);
+         }}
+        >
            {filteredTables.length === 0 && (
              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
                 <div className="h-32 w-32 bg-forest/5 rounded-full flex items-center justify-center mb-6">
@@ -193,27 +229,22 @@ export function FloorPlanBoard({
              return (
                <div 
                 key={table.id}
+                id={`table-${table.id}`}
                 style={{ 
-                  left: `${table.posX}%`, 
-                  top: `${table.posY}%`,
+                  left: dragTableId === table.id ? undefined : `${table.posX}%`, 
+                  top: dragTableId === table.id ? undefined : `${table.posY}%`,
                   width: `${table.width * 10}px`,
                   height: `${table.height * 10}px`,
                   position: 'absolute'
                 }}
-                className={['transition-all duration-700 select-none p-1', isEditMode ? 'cursor-move' : ''].join(' ')}
-                draggable={isEditMode}
-                onDragOver={(e) => !isEditMode && e.preventDefault()}
-                onDragEnd={(e) => {
-                  if (isEditMode && onUpdateTablePosition) {
-                    const parent = e.currentTarget.parentElement?.getBoundingClientRect();
-                    if (!parent) return;
-                    const rawX = ((e.clientX - parent.left) / parent.width) * 100;
-                    const rawY = ((e.clientY - parent.top) / parent.height) * 100;
-                    const posX = Math.max(0, Math.min(100 - table.width, rawX));
-                    const posY = Math.max(0, Math.min(100 - table.height, rawY));
-                    onUpdateTablePosition(table.id, posX, posY);
-                  }
+                className={['transition-all duration-300 select-none p-1', isEditMode ? 'cursor-move z-10 hover:scale-105' : ''].join(' ')}
+                onPointerDown={(e) => {
+                   if(isEditMode) {
+                     e.preventDefault();
+                     setDragTableId(table.id);
+                   }
                 }}
+                onDragOver={(e) => !isEditMode && e.preventDefault()}
                 onDrop={(e) => {
                   if (isEditMode) return;
                   const data = e.dataTransfer.getData('text/plain');
@@ -297,10 +328,10 @@ export function FloorPlanBoard({
                                 <Sparkles size={20} className="text-gold" />
                                 <span className="font-bold text-lg">Occupation en cours</span>
                              </div>
-                             <span className="text-xs font-black bg-rose-200/50 px-3 py-1 rounded-full">{formatElapsedTime(activeOrder?.createdAt || new Date().toISOString())}</span>
+                             <span className="text-xs font-black bg-rose-200/50 px-3 py-1 rounded-full">{formatElapsedTime(firstOrderCreatedAt)}</span>
                           </div>
                           <div className="space-y-3">
-                             {activeOrder?.items.map((item, i) => (
+                             {aggregatedItems.map((item, i) => (
                                <div key={i} className="flex justify-between items-center bg-white/60 p-3 rounded-2xl">
                                   <span className="text-sm font-bold text-forest">{item.quantity}x {item.name}</span>
                                   <span className="text-xs font-black text-clay">{item.unitPrice * item.quantity} XOF</span>
@@ -309,7 +340,7 @@ export function FloorPlanBoard({
                           </div>
                           <div className="flex justify-between items-center pt-4 border-t border-forest/5">
                              <span className="text-sm font-black text-forest uppercase tracking-widest opacity-40">Additif total</span>
-                             <span className="text-2xl font-display text-forest">{activeOrder?.total || 0} XOF</span>
+                             <span className="text-2xl font-display text-forest">{totalAdditif} XOF</span>
                           </div>
                        </div>
                     ) : selectedTable.status === 'reserved' ? (
@@ -322,35 +353,65 @@ export function FloorPlanBoard({
                              <p className="text-sm text-forest/40">Réservé pour {new Date(activeReservation?.date || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'})}</p>
                           </div>
                        </div>
-                    ) : (
-                       <div className="text-center py-10 opacity-30">
-                          <Layout size={40} className="mx-auto mb-4" />
-                          <p className="text-lg font-display uppercase tracking-[0.2em]">Table Disponible</p>
+                    ) : selectedTable.status === 'cleaning' ? (
+                        <div className="text-center py-10 opacity-60">
+                           <div className="h-16 w-16 bg-rose-50 rounded-full flex items-center justify-center mx-auto shadow-sm mb-4">
+                              <Sparkles className="text-rose-400" size={32} />
+                           </div>
+                           <p className="text-lg font-display uppercase tracking-[0.2em] text-rose-500">Nettoyage en cours</p>
+                           <p className="text-xs text-rose-400/60 font-bold mt-2">Cliquez sur Rétablir Libre une fois prête</p>
+                        </div>
+                     ) : (
+                        <div className="text-center py-10 opacity-30">
+                           <Layout size={40} className="mx-auto mb-4" />
+                           <p className="text-lg font-display uppercase tracking-[0.2em]">Table Disponible</p>
                         </div>
                      )}
                      
-                     {!activeOrder && onCreateOrder && selectedTable.status === 'occupied' && (
-                        <button 
-                          onClick={() => {
-                            const firstMenuItem = menu?.[0]?.items[0];
-                            if (!firstMenuItem) return alert("Le menu est vide, veuillez créer des plats.");
-                            onCreateOrder({
-                              tableId: selectedTable.id,
-                              tableLabel: selectedTable.label,
-                              customerName: activeReservation?.guestName || "Client X",
-                              items: [{ menuItemId: firstMenuItem.id, name: firstMenuItem.name, quantity: 1, unitPrice: firstMenuItem.price }],
-                              notes: 'Commande prise sur tablette (test auto)'
-                            }).then(() => setDetailsModal(null));
-                          }}
-                          className="w-full mt-4 py-4 rounded-xl bg-gold text-forest font-bold uppercase tracking-widest text-xs hover:bg-gold/80 transition-all"
-                        >
-                           + Prendre Commande (Test Rapide)
-                        </button>
+                     {onCreateOrder && selectedTable.status === 'occupied' && (
+                        <div className="text-left w-full mt-4">
+                           <div className="max-h-40 overflow-y-auto w-full mb-4 space-y-2 pr-2 custom-scrollbar">
+                             {menu?.flatMap(c => c.items).map(item => (
+                                <div key={item.id} className="flex justify-between items-center text-sm font-bold text-forest bg-white/50 p-2 border border-forest/5 rounded-xl hover:bg-white transition-colors">
+                                   <span>{item.name} <span className="text-clay text-xs tracking-tighter">({item.price} XOF)</span></span>
+                                   <button onClick={() => {
+                                      setOrderCart(prev => {
+                                        const ex = prev.find(p => p.id === item.id);
+                                        if (ex) return prev.map(p => p.id === item.id ? { ...p, qty: p.qty + 1 } : p);
+                                        return [...prev, { id: item.id, name: item.name, price: Number(item.price), qty: 1 }];
+                                      })
+                                   }} className="h-6 w-6 bg-forest/10 hover:bg-forest/20 rounded-full flex items-center justify-center transition-all">+</button>
+                                </div>
+                             ))}
+                           </div>
+                           {orderCart.length > 0 ? (
+                             <div className="p-4 bg-white/80 rounded-2xl border border-forest/10 shadow-sm animate-in fade-in slide-in-from-bottom-2">
+                                {orderCart.map(c => (
+                                   <div className="flex justify-between text-xs font-bold text-forest pb-2 mb-2 border-b border-forest/5" key={c.id}>
+                                     <span>{c.qty}x {c.name}</span>
+                                     <button onClick={() => setOrderCart(prev => prev.filter(p => p.id !== c.id))} className="text-rose-500 hover:text-rose-600">Retirer</button>
+                                   </div>
+                                ))}
+                                <button onClick={() => {
+                                   onCreateOrder({
+                                      tableId: selectedTable.id,
+                                      tableLabel: selectedTable.label,
+                                      customerName: activeReservation?.guestName || "Client Sur Place",
+                                      items: orderCart.map(c => ({ menuItemId: c.id, name: c.name, quantity: c.qty, unitPrice: c.price })),
+                                      notes: 'Pris via tablette serveur'
+                                   }).then(() => setDetailsModal(null));
+                                }} className="w-full py-4 mt-2 rounded-xl bg-gradient-to-r from-gold to-clay text-forest font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-all shadow-xl shadow-gold/20">
+                                   Valider la Commande ({orderCart.reduce((sum, c) => sum + c.qty * c.price, 0)} XOF)
+                                </button>
+                             </div>
+                           ) : (
+                             <div className="bg-forest/5 rounded-2xl p-4 text-center">
+                                <p className="text-xs font-bold text-forest/40 uppercase tracking-widest">Le panier est vide</p>
+                             </div>
+                           )}
+                        </div>
                      )}
-                     {false ? (
-                        <div className="hidden">
-                       </div>
-                    )}
+
                  </div>
 
                  <div className="grid grid-cols-2 gap-4">
