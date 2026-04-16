@@ -273,15 +273,22 @@ export function KitchenMenu({
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-bold uppercase tracking-widest text-forest/40 mb-2 block">Catégorie</label>
-                    <select
+                    <input
+                      list="menu-categories"
                       value={menuForm.category}
                       onChange={(e) => setMenuForm({ ...menuForm, category: e.target.value })}
+                      placeholder="Plats, Boissons, Entrées..."
                       className="w-full px-4 py-3 rounded-xl border border-forest/10 font-bold text-sm outline-none focus:ring-2 ring-gold"
-                    >
+                    />
+                    <datalist id="menu-categories">
                       {menu.map(cat => (
-                        <option key={cat.category} value={cat.category}>{cat.category}</option>
+                        <option key={cat.category} value={cat.category} />
                       ))}
-                    </select>
+                      <option value="Boissons" />
+                      <option value="Entrées" />
+                      <option value="Plats" />
+                      <option value="Desserts" />
+                    </datalist>
                   </div>
                   <div>
                     <label className="text-xs font-bold uppercase tracking-widest text-forest/40 mb-2 block">Prix (FCFA)</label>
