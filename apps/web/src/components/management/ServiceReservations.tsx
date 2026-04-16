@@ -15,6 +15,9 @@ interface ServiceReservationsProps {
   onAssignTable: (resId: string, tableId: string) => void;
   onTableStatusChange: (tableId: string, status: TableStatus) => void;
   onCreatePayment: (orderId: string, amount: number) => void;
+  menu?: any[];
+  onCreateOrder?: (payload: any) => Promise<any>;
+  onUpdateOrderStatus?: (id: string, status: string) => Promise<any>;
 }
 
 export function ServiceReservations({
@@ -25,7 +28,10 @@ export function ServiceReservations({
   onReservationStatusChange,
   onAssignTable,
   onTableStatusChange,
-  onCreatePayment
+  onCreatePayment,
+  menu,
+  onCreateOrder,
+  onUpdateOrderStatus
 }: ServiceReservationsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string | 'all'>('all');
