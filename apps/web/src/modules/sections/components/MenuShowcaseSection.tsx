@@ -40,16 +40,16 @@ export function MenuShowcaseSection({
         </div>
       ) : (
         <div className="grid gap-10 xl:grid-cols-2">
-          {categoriesToRender.map((category) => (
-            <article key={category.category || (category as any).title} className="surface-card p-10 lg:p-14">
+          {categoriesToRender.map((category: any) => (
+            <article key={category.category || category.title} className="surface-card p-10 lg:p-14">
               <h3 className="font-display text-4xl text-forest border-b border-forest/10 pb-6 mb-8">
-                {category.category || (category as any).title}
+                {category.category || category.title}
               </h3>
-              {((category as any).description) && (
+              {category.description && (
                 <p className="mb-10 text-base italic text-ink/50">{(category as any).description}</p>
               )}
               <div className="space-y-10">
-                {category.items.filter(item => item.available !== false).map((item) => (
+                {(category as any).items.filter((item: any) => item.available !== false).map((item: any) => (
                   <div
                     key={item.id || item.name}
                     className="group relative"
@@ -58,14 +58,14 @@ export function MenuShowcaseSection({
                       <h4 className="font-display text-2xl text-ink group-hover:text-gold transition-colors">{item.name}</h4>
                       <div className="flex-1 border-b border-dotted border-forest/20 mx-4" />
                       <span className="font-display text-xl font-bold text-clay">
-                        {item.price.toLocaleString('fr-FR')} FCFA
+                        {typeof item.price === 'number' ? item.price.toLocaleString('fr-FR') + ' FCFA' : item.price}
                       </span>
                     </div>
                     <p className="mt-3 text-sm leading-relaxed text-ink/70 max-w-[85%]">{item.description}</p>
                     
                     {item.tags && item.tags.length > 0 && (
                       <div className="flex gap-2 mt-2">
-                        {item.tags.map(tag => (
+                        {item.tags.map((tag: any) => (
                           <span key={tag} className="text-[10px] font-bold uppercase tracking-widest text-gold bg-gold/10 px-2 py-0.5 rounded">
                             {tag}
                           </span>
@@ -76,7 +76,7 @@ export function MenuShowcaseSection({
                 ))}
               </div>
             </article>
-          ))}
+          ))} 
         </div>
       )}
     </section>
