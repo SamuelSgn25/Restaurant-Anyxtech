@@ -15,7 +15,7 @@ export function SiteHeader() {
           <p className="text-xs uppercase tracking-[0.3em] text-clay font-bold">Hotel restaurant</p>
         </Link>
         <nav className="hidden gap-6 md:flex">
-          {siteContent.pages.map((item) => (
+          {siteContent.pages.filter((item) => item.slug !== '/experience').map((item) => (
             <NavLink
               key={item.slug}
               to={item.slug}
