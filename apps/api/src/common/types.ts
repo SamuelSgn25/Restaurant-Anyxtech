@@ -32,6 +32,7 @@ export interface MenuItemRecord {
   description: string;
   price: number;
   available: boolean;
+  image?: string;
   tags: string[];
   createdBy?: string;
 }
