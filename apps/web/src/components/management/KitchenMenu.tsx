@@ -9,7 +9,7 @@ interface KitchenMenuProps {
   kitchenTickets: Order[];
   menu: MenuCategory[];
   onUpdateOrderStatus: (id: string, status: string) => void;
-  onCreateMenuItem: (data: { category: string; name: string; description: string; price: number; available: boolean; tags: string[] }) => void;
+  onCreateMenuItem: (data: { category: string; name: string; description: string; price: number; available: boolean; tags: string[]; image?: string }) => void;
   onUpdateMenuItemAvailability: (id: string, available: boolean) => void;
   onDeleteMenuItem: (id: string) => void;
 }
@@ -43,12 +43,13 @@ export function KitchenMenu({
     description: '',
     price: 0,
     available: true,
-    tags: ''
+    tags: '',
+    image: ''
   });
 
   const pendingTickets = useMemo(() => {
     const filtered = kitchenTickets.filter(order => {
-      const matchesSearch = order.tableId?.includes(searchTerm) || '';
+      const matchesSearch = order.tableLabel.toLowerCase().includes(searchTerm.toLowerCase()) || order.customerName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = filterStatus === 'all' || order.status === filterStatus;
       return !searchTerm || (matchesSearch && matchesStatus);
     });
@@ -265,7 +266,7 @@ export function KitchenMenu({
                     ...menuForm,
                     tags: menuForm.tags.split(',').map(t => t.trim()).filter(Boolean)
                   });
-                  setMenuForm({ category: 'Plats', name: '', description: '', price: 0, available: true, tags: '' });
+                  setMenuForm({ category: 'Plats', name: '', description: '', price: 0, available: true, tags: '', image: '' });
                   setIsCreatingItem(false);
                 }}
                 className="space-y-4"
@@ -321,6 +322,16 @@ export function KitchenMenu({
                   />
                 </div>
                 <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-forest/40 mb-2 block">Image du plat</label>
+                  <input
+                    type="url"
+                    value={menuForm.image}
+                    onChange={(e) => setMenuForm({ ...menuForm, image: e.target.value })}
+                    placeholder="https://..."
+                    className="w-full px-4 py-3 rounded-xl border border-forest/10 font-bold text-sm outline-none focus:ring-2 ring-gold"
+                  />
+                </div>
+                <div>
                   <label className="text-xs font-bold uppercase tracking-widest text-forest/40 mb-2 block">Tags (séparés par des virgules)</label>
                   <input
                     type="text"
@@ -348,6 +359,11 @@ export function KitchenMenu({
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredItems.map(item => (
                 <div key={item.id} className="bg-white rounded-[2rem] border border-forest/5 p-6 space-y-3 hover:border-forest/10 transition-all">
+                  {item.image ? (
+                    <div className="overflow-hidden rounded-[1.4rem]">
+                      <img src={item.image} alt={item.name} className="h-44 w-full object-cover" />
+                    </div>
+                  ) : null}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
                       <h3 className="font-bold text-forest text-sm">{item.name}</h3>
