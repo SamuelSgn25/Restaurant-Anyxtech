@@ -29,11 +29,11 @@ export class RestaurantDataService {
   ];
 
   private readonly menuItems: MenuItemRecord[] = [
-    { id: 'menu-1', category: 'Entrees', name: 'Tartare de daurade au gingembre', description: 'Agrumes, herbes fraiches et huile pimentee douce.', price: 9500, available: true, tags: ['poisson', 'signature'], createdBy: 'usr-chef-1' },
-    { id: 'menu-2', category: 'Entrees', name: 'Accras de crevettes du golfe', description: 'Sauce verte au basilic africain.', price: 7500, available: true, tags: ['fruits de mer'], createdBy: 'usr-chef-1' },
-    { id: 'menu-3', category: 'Plats', name: 'Poulet bicyclette facon yassa', description: 'Riz coco, oignons confits et citron vert.', price: 11000, available: true, tags: ['volaille', 'benin'], createdBy: 'usr-chef-1' },
-    { id: 'menu-4', category: 'Plats', name: 'Filet de boeuf, jus au poivre de Penja', description: 'Puree lisse et legumes rotis.', price: 15000, available: true, tags: ['boeuf', 'premium'], createdBy: 'usr-admin-1' },
-    { id: 'menu-5', category: 'Desserts', name: 'Ananas roti, creme legere vanille', description: 'Tuile croustillante et caramel epice.', price: 5500, available: true, tags: ['dessert'], createdBy: 'usr-chef-1' }
+    { id: 'menu-1', category: 'Entrees', name: 'Tartare de daurade au gingembre', description: 'Agrumes, herbes fraiches et huile pimentee douce.', price: 9500, available: true, image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80', tags: ['poisson', 'signature'], createdBy: 'usr-chef-1' },
+    { id: 'menu-2', category: 'Entrees', name: 'Accras de crevettes du golfe', description: 'Sauce verte au basilic africain.', price: 7500, available: true, image: 'https://images.unsplash.com/photo-1529042410759-befb1204b468?auto=format&fit=crop&w=900&q=80', tags: ['fruits de mer'], createdBy: 'usr-chef-1' },
+    { id: 'menu-3', category: 'Plats', name: 'Poulet bicyclette facon yassa', description: 'Riz coco, oignons confits et citron vert.', price: 11000, available: true, image: 'https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&fit=crop&w=900&q=80', tags: ['volaille', 'benin'], createdBy: 'usr-chef-1' },
+    { id: 'menu-4', category: 'Plats', name: 'Filet de boeuf, jus au poivre de Penja', description: 'Puree lisse et legumes rotis.', price: 15000, available: true, image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80', tags: ['boeuf', 'premium'], createdBy: 'usr-admin-1' },
+    { id: 'menu-5', category: 'Desserts', name: 'Ananas roti, creme legere vanille', description: 'Tuile croustillante et caramel epice.', price: 5500, available: true, image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=900&q=80', tags: ['dessert'], createdBy: 'usr-chef-1' }
   ];
 
   private tables: RestaurantTableRecord[] = [
@@ -248,11 +248,12 @@ export class RestaurantDataService {
 
   createOrder(payload: Omit<OrderRecord, 'id' | 'createdAt' | 'status' | 'tableLabel'>) {
     const table = this.findTable(payload.tableId);
-    const order: OrderRecord = { id: `ord-${Date.now()}`, createdAt: new Date().toISOString(), status: 'draft', ...payload, tableLabel: table.label };
+    const order: OrderRecord = { id: `ord-${Date.now()}`, createdAt: new Date().toISOString(), status: 'sent_to_kitchen', ...payload, tableLabel: table.label };
     table.status = 'occupied';
     table.activeOrderId = order.id;
     this.orders = [order, ...this.orders];
-    this.pushNotification('order', 'Nouvelle commande', `${order.tableLabel} vient de recevoir une commande.`);
+    this.pushNotification('order', 'Commande envoyee en cuisine', `${order.tableLabel} a transmis une nouvelle commande en cuisine.`);
+    this.eventsGateway.broadcast('order_status', { orderId: order.id, status: order.status, tableId: order.tableId, tableLabel: order.tableLabel });
     return { ...order, total: this.computeOrderTotal(order) };
   }
 
@@ -267,7 +268,14 @@ export class RestaurantDataService {
       table.status = 'occupied';
       table.activeOrderId = order.id;
     }
-    this.pushNotification('order', 'Commande mise a jour', `${order.tableLabel} est maintenant ${status}.`);
+    const message =
+      status === 'ready'
+        ? `${order.tableLabel} est prete pour le service.`
+        : status === 'served'
+          ? `${order.tableLabel} a ete servie.`
+          : `${order.tableLabel} est maintenant ${status}.`;
+    this.pushNotification('order', 'Commande mise a jour', message);
+    this.eventsGateway.broadcast('order_status', { orderId: order.id, status: order.status, tableId: order.tableId, tableLabel: order.tableLabel });
     return { ...order, total: this.computeOrderTotal(order) };
   }
 
