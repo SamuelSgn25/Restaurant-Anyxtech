@@ -66,6 +66,11 @@ export function ServiceReservations({
     return orders.find(o => o.tableId === tableId && o.status !== 'closed');
   };
 
+  const readyOrders = useMemo(
+    () => orders.filter((order) => order.status === 'ready'),
+    [orders]
+  );
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     const now = new Date();
@@ -87,6 +92,28 @@ export function ServiceReservations({
 
   return (
     <div className="space-y-8">
+      {readyOrders.length > 0 && (
+        <div className="rounded-[2rem] border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-700">Cuisine vers service</p>
+              <h3 className="mt-2 font-display text-2xl text-emerald-900">Commandes pretes a retirer</h3>
+            </div>
+            <div className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-white">
+              {readyOrders.length} prete{readyOrders.length > 1 ? 's' : ''}
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {readyOrders.map((order) => (
+              <div key={order.id} className="rounded-[1.3rem] border border-emerald-200 bg-white px-4 py-3">
+                <p className="font-semibold text-forest">{order.tableLabel}</p>
+                <p className="mt-1 text-sm text-ink/65">{order.customerName} · {order.items.length} article{order.items.length > 1 ? 's' : ''}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -181,7 +208,7 @@ export function ServiceReservations({
                             resOrder ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
                           }`}>
                             <MapPinIcon size={12} />
-                            Table {resTable.label} {resOrder && `• ${resOrder.items.length} plats`}
+                            Table {resTable.label} {resOrder && `• ${resOrder.items.length} plats • ${resOrder.status.replace(/_/g, ' ')}`}
                           </div>
                         )}
                       </div>
@@ -283,9 +310,9 @@ export function ServiceReservations({
                     }}
                     className="w-full py-3 rounded-xl bg-gradient-to-r from-gold to-clay text-forest font-bold uppercase tracking-widest text-xs shadow-lg shadow-gold/20 hover:scale-105 transition-all"
                   >
-                    {selectedReservation.status === 'pending' && '✓ Confirmer'}
-                    {selectedReservation.status === 'confirmed' && '👥 Installer'}
-                    {selectedReservation.status === 'seated' && '✓ Terminer Service'}
+                    {selectedReservation.status === 'pending' && 'Confirmer la reservation'}
+                    {selectedReservation.status === 'confirmed' && 'Confirmer la presence et installer'}
+                    {selectedReservation.status === 'seated' && 'Terminer le service'}
                   </button>
                 )}
 
