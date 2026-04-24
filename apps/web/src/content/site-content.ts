@@ -1,11 +1,11 @@
-import { Martini, Utensils, Flower2, Sparkles, ChefHat, MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { ChefHat, Flower2, Martini, Sparkles } from 'lucide-react';
 
 export const siteContent = {
   restaurant: {
     name: 'Le Cactus',
-    tagline: 'L’élégance culinaire au cœur de Cotonou',
+    tagline: 'Cuisine franco-beninoise dans une adresse elegante de Cotonou.',
     logo: '/logo.png',
-    footerNote: 'Une architecture contemporaine avec une touche traditionnelle béninoise.'
+    footerNote: 'Un site vitrine clair, relie a un back office restaurant moderne et evolutif.'
   },
   pages: [
     {
@@ -15,142 +15,139 @@ export const siteContent = {
       sections: [
         {
           type: 'hero',
-          eyebrow: 'Gastronomie & Raffinement',
-          title: 'Une Odyssée culinaire entre Terre et Mer.',
+          eyebrow: 'Restaurant signature',
+          title: 'Une table raffinee pour les dejeuners, les diners et les moments a celebrer.',
           description:
-            'Le restaurant Le Cactus vous invite à découvrir une cuisine d’auteur, où les produits locaux du Bénin rencontrent les techniques de la haute gastronomie internationale. Un cadre d’exception pour vos moments les plus précieux.',
-          primaryCta: { label: 'Réserver une table', href: '/reservation' },
-          secondaryCta: { label: 'Découvrir la carte', href: '/menu' },
+            'Le Cactus propose une cuisine soignee, un service attentif et une ambiance premium pensee pour les clients de l hotel comme pour les visiteurs de passage.',
+          primaryCta: { label: 'Reserver une table', href: '/reservation' },
+          secondaryCta: { label: 'Decouvrir la carte', href: '/menu' },
           stats: [
             { label: 'Cuisine', value: 'Signature' },
-            { label: 'Cadre', value: 'Prestige' },
-            { label: 'Service', value: 'Dédié' }
+            { label: 'Cadre', value: 'Elegant' },
+            { label: 'Service', value: 'Fluide' }
           ],
-          image:
-            'https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&w=1920&q=80'
+          image: 'https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&w=1920&q=80'
+        },
+        {
+          type: 'story',
+          eyebrow: 'Notre promesse',
+          title: 'Une experience pensee pour bien manger, bien recevoir et revenir.',
+          paragraphs: [
+            'La carte valorise les produits locaux, les cuissons justes et une presentation contemporaine.',
+            'Le lieu accompagne aussi bien un repas d affaires, un diner en couple, un brunch de weekend ou une reservation de groupe.'
+          ],
+          image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=80'
         },
         {
           type: 'features',
-          eyebrow: 'Nos Engagements',
-          title: 'L’Excellence dans chaque détail',
+          eyebrow: 'Les essentiels',
+          title: 'Ce qui fait la signature du Cactus',
           items: [
             {
-              title: 'Produits Locaux',
-              description: 'Nous collaborons avec les meilleurs producteurs du Bénin pour garantir une fraîcheur absolue.',
-              icon: Flower2
-            },
-            {
-              title: 'Art Culinaire',
-              description: 'Chaque plat est une œuvre pensée par notre Chef pour surprendre vos sens.',
+              title: 'Cuisine d auteur',
+              description: 'Des assiettes lisibles, gourmandes et regulierement renouvelees.',
               icon: ChefHat
             },
             {
-              title: 'Service Sur-Mesure',
-              description: 'Une équipe attentive et discrète pour faire de votre repas un souvenir inoubliable.',
+              title: 'Produits du terroir',
+              description: 'Une place forte accordee aux saveurs du Benin et aux arrivages de saison.',
+              icon: Flower2
+            },
+            {
+              title: 'Bar et accords',
+              description: 'Cocktails, vins et boissons maison pour accompagner chaque service.',
+              icon: Martini
+            },
+            {
+              title: 'Accueil sur mesure',
+              description: 'Reservations, groupes, anniversaires et besoins particuliers traites avec soin.',
               icon: Sparkles
             }
           ]
         },
         {
           type: 'testimonials',
-          eyebrow: 'Avis de nos hôtes',
-          title: 'Ce que disent nos clients',
+          eyebrow: 'Avis clients',
+          title: 'Une adresse qui marque les esprits',
           items: [
             {
-              quote: 'Une expérience transcendante. Le mélange des saveurs locales et du raffinement moderne est tout simplement magistral.',
-              author: 'Marc-Antoine S.',
-              role: 'Critique Gastronomique'
+              quote: 'Le cadre est magnifique et le service est au niveau du lieu.',
+              author: 'Felicite K.',
+              role: 'Cliente'
             },
             {
-              quote: 'Le meilleur spot de Cotonou pour un dîner d’affaires. Calme, élégant et une carte des vins impressionnante.',
-              author: 'Félicité K.',
-              role: 'Entrepreneure'
+              quote: 'Une carte courte mais tres bien executee, avec une vraie identite.',
+              author: 'Marc S.',
+              role: 'Voyageur'
             }
           ]
         },
         {
           type: 'reservation-cta',
-          eyebrow: 'Privatisation',
-          title: 'Célébrez vos événements dans un cadre prestigieux',
+          eyebrow: 'Evenements',
+          title: 'Privatisations, diners d affaires et grandes tables',
           description:
-            "Que ce soit pour un mariage, un séminaire ou un dîner privé, Le Cactus met à votre disposition ses salons et sa terrasse pour des moments d’exception.",
+            'Notre equipe peut organiser vos receptions privees, repas de groupe ou rendez-vous professionnels avec une formule adaptee.',
           bullets: [
-            'Salons VIP climatisés',
-            'Terrasse avec vue jardin',
-            'Menus personnalisés sur demande'
+            'Salons VIP',
+            'Terrasse amenagee',
+            'Menus personnalises'
           ]
         },
         {
           type: 'contact',
           eyebrow: 'Infos pratiques',
           title: 'Nous rendre visite',
-          address: "Hôtel Cactus, Zone Résidentielle, Cotonou, Bénin",
+          address: 'Hotel Cactus, Cotonou, Benin',
           phone: '+229 01 95 95 95 95',
           email: 'reservation@lecactushotel.bj',
           schedule: [
             'Lundi - Samedi : 12h00 - 15h00 / 19h00 - 23h00',
-            'Dimanche : Brunch de 11h30 à 16h00',
-            'Fermé le Dimanche soir'
+            'Dimanche : brunch de 11h30 a 16h00',
+            'Reservations groupe sur demande'
           ]
         }
       ]
     },
     {
       slug: '/menu',
-      label: 'La Carte',
-      title: 'Notre Carte Gastronomique',
+      label: 'Carte',
+      title: 'Notre carte',
       sections: [
         {
           type: 'hero',
-          eyebrow: 'Saveurs Authentiques',
-          title: 'La rencontre des saisons et de la passion.',
+          eyebrow: 'La carte',
+          title: 'Des plats signatures, des boissons choisies et une presentation soignee.',
           description:
-            'Notre carte évolue au fil des arrivages et de l’inspiration de notre Chef. Découvrez une sélection de plats raffinés célébrant le terroir béninois.',
-          primaryCta: { label: 'Réserver maintenant', href: '/reservation' },
-          secondaryCta: { label: 'Voir les boissons', href: '#' },
+            'La carte s adapte au rythme du restaurant et du chef. Vous y retrouvez des entrees, plats, desserts et boissons presentes de facon claire et appetissante.',
+          primaryCta: { label: 'Reserver maintenant', href: '/reservation' },
+          secondaryCta: { label: 'Vivre l experience', href: '/experience' },
           stats: [
-            { label: 'Menu', value: 'Saisonnier' },
-            { label: 'Vins', value: 'Grands Crus' },
-            { label: 'Chef', value: 'Exécutif' }
+            { label: 'Format', value: 'Court' },
+            { label: 'Cuisine', value: 'Mixte' },
+            { label: 'Boissons', value: 'Selection' }
           ],
-          image:
-            'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80'
+          image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80'
         },
         {
           type: 'menu-showcase',
-          eyebrow: 'La Sélection',
-          title: 'Signature du Chef',
+          eyebrow: 'Selection',
+          title: 'Une carte vivante, alimentee par la cuisine',
           categories: [
             {
-              title: 'Entrées Subtiles',
-              description: 'Pour éveiller votre curiosité.',
+              title: 'Entrees',
+              description: 'Pour ouvrir le repas.',
               items: [
-                {
-                  name: 'Tartare de Daurade au Gingembre',
-                  description: 'Zestes de combava, huile de coco vierge et jeunes pousses.',
-                  price: '9 500 FCFA'
-                },
-                {
-                  name: 'Accras de Crevettes du Golfe',
-                  description: 'Sauce verte au basilic africain et piment doux.',
-                  price: '7 500 FCFA'
-                }
+                { name: 'Tartare de daurade', description: 'Agrumes, herbes et huile pimentee douce.', price: '9 500 FCFA' },
+                { name: 'Accras de crevettes', description: 'Sauce verte et basilic africain.', price: '7 500 FCFA' }
               ]
             },
             {
-              title: 'Plats d’Exception',
-              description: 'Le cœur de notre savoir-faire.',
+              title: 'Plats',
+              description: 'Les incontournables de la maison.',
               items: [
-                {
-                  name: 'Poulet Bicyclette en deux cuissons',
-                  description: 'Fumé puis braisé, écrasé de manioc au beurre de baratte.',
-                  price: '14 000 FCFA'
-                },
-                {
-                  name: 'Filet de Bœuf au Poivre de Penja',
-                  description: 'Jus corsé, mille-feuille de patate douce et légumes rôtis.',
-                  price: '18 000 FCFA'
-                }
+                { name: 'Poulet bicyclette facon yassa', description: 'Riz coco, oignons confits et citron vert.', price: '11 000 FCFA' },
+                { name: 'Filet de boeuf au poivre de Penja', description: 'Puree lisse et legumes rotis.', price: '15 000 FCFA' }
               ]
             }
           ]
@@ -158,25 +155,78 @@ export const siteContent = {
       ]
     },
     {
-      slug: '/reservation',
-      label: 'Réservation',
-      title: 'Réserver une table au Cactus',
+      slug: '/experience',
+      label: 'Experience',
+      title: 'Experience',
       sections: [
         {
           type: 'hero',
-          eyebrow: 'Un Moment Privilégié',
-          title: 'L’assurance d’une table à la hauteur de vos attentes.',
+          eyebrow: 'Moments a vivre',
+          title: 'Brunch, diner, cocktails et rendez-vous memorables.',
           description:
-            'Réservez votre table en quelques clics et laissez-nous préparer votre accueil. Notre équipe se tient prête à rendre votre venue exceptionnelle.',
-          primaryCta: { label: 'Appeler Directement', href: 'tel:+2290195959595' },
-          secondaryCta: { label: 'Nous Écrire', href: 'mailto:reservation@lecactushotel.bj' },
+            'Le Cactus ne se limite pas a un repas. C est aussi une ambiance, une qualite de service et une facon de recevoir qui valorise chaque occasion.',
+          primaryCta: { label: 'Reserver une table', href: '/reservation' },
+          secondaryCta: { label: 'Voir la carte', href: '/menu' },
           stats: [
-            { label: 'Capacité', value: 'Jusqu’à 80 pers.' },
-            { label: 'VIP', value: 'Sur Réservation' },
-            { label: 'Réponse', value: '< 30 min' }
+            { label: 'Brunch', value: 'Week-end' },
+            { label: 'Afterwork', value: 'Possible' },
+            { label: 'VIP', value: 'Sur demande' }
           ],
-          image:
-            'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1920&q=80'
+          image: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80'
+        },
+        {
+          type: 'features',
+          eyebrow: 'Formats',
+          title: 'Des usages utiles et bien identifies',
+          items: [
+            {
+              title: 'Dejeuner d affaires',
+              description: 'Un service rapide, un cadre calme et une carte lisible.',
+              icon: Sparkles
+            },
+            {
+              title: 'Diner signature',
+              description: 'Pour les clients en quete de saveur, de cadre et de detail.',
+              icon: ChefHat
+            },
+            {
+              title: 'Cocktails et terrasse',
+              description: 'Une respiration elegante pour l afterwork ou la soiree.',
+              icon: Martini
+            }
+          ]
+        },
+        {
+          type: 'gallery',
+          eyebrow: 'Ambiance',
+          title: 'Quelques scenes du lieu',
+          images: [
+            { src: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80', alt: 'Service en salle' },
+            { src: 'https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=900&q=80', alt: 'Dressage de plat' },
+            { src: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=900&q=80', alt: 'Soiree au restaurant' }
+          ]
+        }
+      ]
+    },
+    {
+      slug: '/reservation',
+      label: 'Reservation',
+      title: 'Reservation',
+      sections: [
+        {
+          type: 'hero',
+          eyebrow: 'Reservation',
+          title: 'Reservez votre table en quelques instants.',
+          description:
+            'Indiquez simplement vos coordonnees, le nombre de couverts, la date et la zone souhaitee. Notre equipe confirme ensuite votre demande dans les meilleurs delais.',
+          primaryCta: { label: 'Appeler directement', href: 'tel:+2290195959595' },
+          secondaryCta: { label: 'Nous ecrire', href: 'mailto:reservation@lecactushotel.bj' },
+          stats: [
+            { label: 'Zones', value: 'Salle / Terrasse / VIP' },
+            { label: 'Groupes', value: 'Possible' },
+            { label: 'Reponse', value: 'Rapide' }
+          ],
+          image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1920&q=80'
         }
       ]
     }
