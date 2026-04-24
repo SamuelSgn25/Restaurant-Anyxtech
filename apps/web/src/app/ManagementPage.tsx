@@ -179,23 +179,25 @@ export function ManagementPage() {
 
   if (!user || !token) return null;
   const authToken = token;
+  const isLeadership = user.role === 'super_admin' || user.role === 'admin';
 
   return (
-    <main className="min-h-screen bg-[#f8f5f0] text-forest font-sans selection:bg-gold/30">
+    <main className="min-h-screen bg-[linear-gradient(180deg,#f4ecdf_0%,#f7f3eb_28%,#fbf8f2_100%)] text-forest font-sans selection:bg-gold/30">
       <ToastStack items={toasts} onDismiss={(id) => setToasts((current) => current.filter((toast) => toast.id !== id))} />
       {/* Header Overlay */}
-      <div className="absolute top-0 left-0 right-0 h-[400px] bg-[#0f1d18] -z-10" />
+      <div className="absolute top-0 left-0 right-0 h-[420px] bg-[linear-gradient(135deg,#0f1d18,#173126)] -z-10" />
 
       {/* Top Navigation Bar */}
-      <header className="px-6 py-6 border-b border-white/10 bg-forest/20 backdrop-blur-md sticky top-0 z-40">
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-forest/30 px-6 py-6 backdrop-blur-xl">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-white">
               <MenuIcon size={24} />
             </button>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold/80">Premium Management</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold/80">Dashboard operationnel</p>
               <h1 className="text-xl font-display text-white tracking-wide">Hotel Cactus <span className="text-gold/60">•</span> {visibleViews.find(v => v.key === activeView)?.label}</h1>
+              <p className="mt-1 text-xs text-white/45">Interface premium orientee salle, cuisine, caisse et direction.</p>
             </div>
           </div>
 
@@ -233,7 +235,12 @@ export function ManagementPage() {
         <div className="grid lg:grid-cols-[280px_1fr] gap-8 items-start">
           
           {/* Sidebar - Desktop */}
-          <aside className="hidden lg:sticky lg:top-32 lg:flex flex-col gap-2 p-6 rounded-[2.5rem] bg-white shadow-xl shadow-forest/5 border border-forest/5">
+          <aside className="hidden lg:sticky lg:top-32 lg:flex flex-col gap-2 rounded-[2.5rem] border border-forest/5 bg-white/90 p-6 shadow-xl shadow-forest/5 backdrop-blur">
+             <div className="mb-4 rounded-[1.7rem] bg-[linear-gradient(135deg,#13261f,#1d3a2f)] px-5 py-5 text-white">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold/75">Session active</p>
+                <p className="mt-3 font-display text-2xl">{user.name}</p>
+                <p className="mt-1 text-sm text-white/60">{user.role === 'super_admin' ? 'Direction generale' : user.role === 'admin' ? 'Administration' : user.role === 'server' ? 'Service en salle' : user.role === 'chef' ? 'Cuisine' : 'Caisse'}</p>
+             </div>
              {visibleViews.map((view) => (
                 <button 
                   key={view.key} 
@@ -246,6 +253,10 @@ export function ManagementPage() {
                 </button>
              ))}
              <div className="mt-10 pt-6 border-t border-forest/5">
+                <Link to="/" className="mb-3 flex items-center gap-4 rounded-2xl px-6 py-4 text-sm font-bold text-forest/50 transition-all hover:bg-forest/5 hover:text-forest">
+                  <ChevronRight size={20} className="rotate-180" />
+                  Retour au site
+                </Link>
                 <button onClick={logout} className="flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-bold text-rose-500/60 hover:bg-rose-500/5 hover:text-rose-600 transition-all">
                   <LogOut size={20} />
                   Déconnexion
@@ -264,14 +275,38 @@ export function ManagementPage() {
             {/* Dashboard Overview */}
             {activeView === 'overview' && utilityView === 'dashboard' && (
               <div className="space-y-8">
+                <section className="rounded-[2.6rem] border border-white/40 bg-white/75 p-8 shadow-xl shadow-forest/5 backdrop-blur">
+                  <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+                    <div className="max-w-3xl">
+                      <p className="text-[10px] font-black uppercase tracking-[0.35em] text-clay">Vue de pilotage</p>
+                      <h2 className="mt-3 font-display text-4xl text-forest">Un cockpit plus lisible pour chaque equipe</h2>
+                      <p className="mt-3 max-w-2xl text-sm leading-7 text-forest/55">
+                        Les indicateurs clefs, les alertes utiles et les acces rapides sont regroupes ici pour limiter les erreurs de navigation et gagner du temps pendant le service.
+                      </p>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      {[
+                        { label: 'Plan de salle', hint: 'Surveiller les rotations', action: () => setActiveView('tables') },
+                        { label: 'Service', hint: 'Confirmer les arrives', action: () => setActiveView('service') },
+                        { label: 'Cuisine', hint: 'Voir les tickets', action: () => setActiveView('kitchen') }
+                      ].filter((item) => item.label !== 'Cuisine' || canView(user.role, 'kitchen')).map((item) => (
+                        <button key={item.label} type="button" onClick={item.action} className="rounded-[1.4rem] border border-forest/8 bg-sand/45 px-5 py-4 text-left transition hover:border-gold/40 hover:bg-white">
+                          <p className="text-sm font-bold text-forest">{item.label}</p>
+                          <p className="mt-2 text-xs uppercase tracking-[0.2em] text-forest/35">{item.hint}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+
                 <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
                   {[
-                    { label: 'C.A Journalier', value: money(summary?.revenue || 0), icon: DollarSign, color: 'bg-emerald-500', hint: 'Evolution +12%' },
-                    { label: 'Commandes Actives', value: summary?.openOrders || 0, icon: Utensils, color: 'bg-gold', hint: 'Salle occupée à 60%' },
-                    { label: 'Réservations du jour', value: summary?.pendingReservations || 0, icon: Calendar, color: 'bg-clay', hint: '3 VIP ce soir' },
-                    { label: 'Staff Présent', value: summary?.activeStaff || 0, icon: Users, color: 'bg-forest', hint: 'Equipe de garde' }
+                    { label: 'C.A Journalier', value: money(summary?.revenue || 0), icon: DollarSign, color: 'bg-emerald-500', hint: 'Encaissements du service' },
+                    { label: 'Commandes Actives', value: summary?.openOrders || 0, icon: Utensils, color: 'bg-gold', hint: 'Suivi salle + cuisine' },
+                    { label: 'Réservations à suivre', value: summary?.pendingReservations || 0, icon: Calendar, color: 'bg-clay', hint: 'Presences a confirmer' },
+                    { label: 'Staff Présent', value: summary?.activeStaff || 0, icon: Users, color: 'bg-forest', hint: 'Equipe en cours' }
                   ].map((stat, i) => (
-                    <div key={i} className="bg-white rounded-[2rem] p-6 shadow-sm border border-forest/5 hover:shadow-xl transition-all group">
+                    <div key={i} className="rounded-[2rem] border border-forest/5 bg-white p-6 shadow-sm transition-all group hover:-translate-y-1 hover:shadow-xl">
                       <div className="flex justify-between items-start">
                         <div className={['p-3 rounded-2xl text-white shadow-lg', stat.color].join(' ')}>
                           <stat.icon size={20} />
@@ -284,13 +319,13 @@ export function ManagementPage() {
                   ))}
                 </div>
 
-                <div className="grid xl:grid-cols-[1fr_400px] gap-8">
+                <div className={`grid gap-8 ${isLeadership ? 'xl:grid-cols-[1fr_380px]' : 'xl:grid-cols-[1fr_360px]'}`}>
                   {/* Revenue Chart - Simplified SVG */}
-                  <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-forest/5">
+                  <div className="rounded-[2.5rem] border border-forest/5 bg-white p-10 shadow-sm">
                     <div className="flex justify-between items-center mb-8">
                       <div>
                         <h3 className="text-2xl font-display text-forest">Performance Financière</h3>
-                        <p className="text-sm text-forest/40">Suivi des encaissements des 7 derniers jours</p>
+                        <p className="text-sm text-forest/40">Lecture rapide des encaissements et du rythme d exploitation</p>
                       </div>
                       <TrendingUp className="text-emerald-500" />
                     </div>
@@ -311,21 +346,47 @@ export function ManagementPage() {
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-forest/5">
-                    <h3 className="text-xl font-display text-forest mb-6">Activité Récente</h3>
-                    <div className="space-y-6">
-                      {notifications.slice(0, 5).map(notif => (
-                        <div key={notif.id} className="flex gap-4">
-                          <div className="h-10 w-10 shrink-0 rounded-full bg-sand/50 flex items-center justify-center text-forest/40">
-                             <Clock size={16} />
+                  <div className="space-y-8">
+                    <div className="rounded-[2.5rem] border border-forest/5 bg-white p-8 shadow-sm">
+                      <h3 className="text-xl font-display text-forest mb-6">Activité Récente</h3>
+                      <div className="space-y-5">
+                        {notifications.slice(0, 5).map(notif => (
+                          <div key={notif.id} className="flex gap-4">
+                            <div className="h-10 w-10 shrink-0 rounded-full bg-sand/50 flex items-center justify-center text-forest/40">
+                               <Clock size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold leading-tight">{notif.title}</p>
+                              <p className="text-xs text-forest/40 mt-1 line-clamp-2">{notif.message}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-bold leading-tight">{notif.title}</p>
-                            <p className="text-xs text-forest/40 mt-1 line-clamp-1">{notif.message}</p>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
+                    {isLeadership ? (
+                      <div className="rounded-[2.5rem] border border-forest/5 bg-[#13261f] p-8 text-white shadow-sm">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold/75">Journal temps reel</p>
+                            <h3 className="mt-3 font-display text-2xl">Logs direction</h3>
+                          </div>
+                          <FileText className="text-gold/70" />
+                        </div>
+                        <div className="mt-6 space-y-4">
+                          {notifications.slice(0, 6).map((entry) => (
+                            <div key={entry.id} className="rounded-[1.4rem] border border-white/8 bg-white/5 p-4">
+                              <div className="flex items-center justify-between gap-3">
+                                <p className="text-sm font-semibold">{entry.title}</p>
+                                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
+                                  {new Date(entry.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                              <p className="mt-2 text-sm leading-6 text-white/65">{entry.message}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
