@@ -21,6 +21,7 @@ interface FloorPlanProps {
   onLoadData?: () => void;
   menu?: any[];
   onCreateOrder?: (payload: any) => Promise<void>;
+  onUpdateOrderStatus?: (orderId: string, status: Order['status']) => Promise<void>;
 }
 
 export function FloorPlanBoard({
@@ -36,7 +37,8 @@ export function FloorPlanBoard({
   onUpdateTablePosition,
   onLoadData,
   menu,
-  onCreateOrder
+  onCreateOrder,
+  onUpdateOrderStatus
 }: FloorPlanProps) {
   const [activeZone, setActiveZone] = useState('Salle principale');
   const [isEditMode, setIsEditMode] = useState(false);
@@ -85,6 +87,7 @@ export function FloorPlanBoard({
   const aggregatedItems = activeOrders.flatMap(o => o.items);
   const totalAdditif = activeOrders.reduce((sum, o) => sum + o.total, 0);
   const activeReservation = useMemo(() => reservations.find((r) => r.tableId === detailsModal), [reservations, detailsModal]);
+  const currentOrder = activeOrders[0] ?? null;
 
   return (
     <>
@@ -135,7 +138,7 @@ export function FloorPlanBoard({
         </div>
       </div>
 
-      <div className="flex-1 lg:flex min-h-0 bg-[#fbf9f6] relative">
+        <div className="flex-1 lg:flex min-h-0 bg-[#fbf9f6] relative">
         
         {/* Reservation Sidebar for D&D */}
         <aside className="w-full lg:w-72 bg-sand/30 border-r border-forest/5 p-6 space-y-6 overflow-auto custom-scrollbar">
@@ -295,6 +298,15 @@ export function FloorPlanBoard({
                </div>
              );
            })}
+
+           <div className="absolute bottom-6 left-6 rounded-[1.5rem] border border-forest/10 bg-white/90 px-4 py-3 shadow-lg backdrop-blur">
+             <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-forest/50">
+               <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-emerald-500" /> Libre</span>
+               <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-rose-500" /> Occupee</span>
+               <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-orange-500" /> Reservee</span>
+               <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-slate-400" /> Nettoyage</span>
+             </div>
+           </div>
         </div>
       </div>
 
@@ -342,6 +354,26 @@ export function FloorPlanBoard({
                              <span className="text-sm font-black text-forest uppercase tracking-widest opacity-40">Additif total</span>
                              <span className="text-2xl font-display text-forest">{totalAdditif} XOF</span>
                           </div>
+                          {currentOrder ? (
+                            <div className="rounded-[1.5rem] border border-forest/10 bg-white/80 p-4">
+                              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-forest/35">Flux commande</p>
+                              <div className="mt-3 flex items-center justify-between gap-3">
+                                <span className="text-sm font-semibold text-forest">Statut en cours</span>
+                                <span className="rounded-full bg-forest px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                                  {currentOrder.status.replace(/_/g, ' ')}
+                                </span>
+                              </div>
+                              {currentOrder.status === 'ready' && onUpdateOrderStatus ? (
+                                <button
+                                  type="button"
+                                  onClick={() => onUpdateOrderStatus(currentOrder.id, 'served').then(() => setDetailsModal(null))}
+                                  className="mt-4 w-full rounded-2xl bg-emerald-500 px-4 py-3 text-xs font-black uppercase tracking-[0.24em] text-white transition hover:scale-[1.02]"
+                                >
+                                  Confirmer recuperation par le serveur
+                                </button>
+                              ) : null}
+                            </div>
+                          ) : null}
                        </div>
                     ) : selectedTable.status === 'reserved' ? (
                        <div className="text-center space-y-4 py-4">
@@ -392,16 +424,16 @@ export function FloorPlanBoard({
                                      <button onClick={() => setOrderCart(prev => prev.filter(p => p.id !== c.id))} className="text-rose-500 hover:text-rose-600">Retirer</button>
                                    </div>
                                 ))}
-                                <button onClick={() => {
+                             <button onClick={() => {
                                    onCreateOrder({
                                       tableId: selectedTable.id,
                                       tableLabel: selectedTable.label,
                                       customerName: activeReservation?.guestName || "Client Sur Place",
                                       items: orderCart.map(c => ({ menuItemId: c.id, name: c.name, quantity: c.qty, unitPrice: c.price })),
                                       notes: 'Pris via tablette serveur'
-                                   }).then(() => setDetailsModal(null));
+                                    }).then(() => setDetailsModal(null));
                                 }} className="w-full py-4 mt-2 rounded-xl bg-gradient-to-r from-gold to-clay text-forest font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-all shadow-xl shadow-gold/20">
-                                   Valider la Commande ({orderCart.reduce((sum, c) => sum + c.qty * c.price, 0)} XOF)
+                                   Envoyer en cuisine ({orderCart.reduce((sum, c) => sum + c.qty * c.price, 0)} XOF)
                                 </button>
                              </div>
                            ) : (
