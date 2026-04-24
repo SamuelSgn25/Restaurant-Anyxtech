@@ -52,8 +52,15 @@ export function MenuShowcaseSection({
                 {(category as any).items.filter((item: any) => item.available !== false).map((item: any) => (
                   <div
                     key={item.id || item.name}
-                    className="group relative"
+                    className="group relative overflow-hidden rounded-[1.8rem] border border-forest/8 bg-sand/35 p-5"
                   >
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="mb-5 h-48 w-full rounded-[1.4rem] object-cover"
+                      />
+                    ) : null}
                     <div className="flex items-baseline justify-between gap-4">
                       <h4 className="font-display text-2xl text-ink group-hover:text-gold transition-colors">{item.name}</h4>
                       <div className="flex-1 border-b border-dotted border-forest/20 mx-4" />
@@ -61,7 +68,7 @@ export function MenuShowcaseSection({
                         {typeof item.price === 'number' ? item.price.toLocaleString('fr-FR') + ' FCFA' : item.price}
                       </span>
                     </div>
-                    <p className="mt-3 text-sm leading-relaxed text-ink/70 max-w-[85%]">{item.description}</p>
+                    <p className="mt-3 text-sm leading-relaxed text-ink/70">{item.description}</p>
                     
                     {item.tags && item.tags.length > 0 && (
                       <div className="flex gap-2 mt-2">
