@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { io } from 'socket.io-client';
 import { api } from '../lib/api';
 import {
   AuthUser,
@@ -25,6 +26,7 @@ import { TeamManagement } from '../components/management/TeamManagement';
 import { KitchenMenu } from '../components/management/KitchenMenu';
 import { NotificationCenter } from '../components/management/NotificationCenter';
 import { StatusBadge } from '../components/management/StatusBadge';
+import { ToastItem, ToastStack } from '../components/management/ToastStack';
 import { 
   FileText, User, Settings as SettingsIcon, LogOut, Package, 
   Users, Plus, LayoutGrid, CheckCircle2, TrendingUp, 
@@ -55,6 +57,7 @@ export function ManagementPage() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [invoiceMode, setInvoiceMode] = useState<{order: Order} | null>(null);
 
   const [profileForm, setProfileForm] = useState({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', address: user?.address || '' });
@@ -70,6 +73,58 @@ export function ManagementPage() {
     loadData();
     const interval = setInterval(loadData, 5000); 
     return () => clearInterval(interval);
+  }, [token, user]);
+
+  useEffect(() => {
+    if (!token || !user) return;
+
+    const socketUrl = (import.meta.env.VITE_API_URL ?? 'http://localhost:3001/api').replace(/\/api$/, '');
+    const socket = io(socketUrl, {
+      transports: ['websocket', 'polling']
+    });
+
+    const pushToast = (item: ToastItem) => {
+      setToasts((current) => [item, ...current].slice(0, 4));
+      window.setTimeout(() => {
+        setToasts((current) => current.filter((toast) => toast.id !== item.id));
+      }, 4500);
+    };
+
+    socket.on('notification', (notification: NotificationItem) => {
+      setNotifications((current) => [notification, ...current].slice(0, 20));
+      pushToast({
+        id: notification.id,
+        title: notification.title,
+        message: notification.message,
+        tone: notification.type === 'order' ? 'warning' : 'info'
+      });
+    });
+
+    socket.on('order_status', (payload: { orderId: string; status: Order['status']; tableLabel: string }) => {
+      const tone = payload.status === 'ready' ? 'success' : payload.status === 'in_preparation' ? 'warning' : 'info';
+      const message =
+        payload.status === 'ready'
+          ? `${payload.tableLabel} est prete. Le serveur peut venir recuperer la commande.`
+          : payload.status === 'in_preparation'
+            ? `${payload.tableLabel} est en preparation en cuisine.`
+            : `${payload.tableLabel} a change de statut: ${payload.status.replace(/_/g, ' ')}.`;
+
+      pushToast({
+        id: `${payload.orderId}-${payload.status}-${Date.now()}`,
+        title: 'Flux service en direct',
+        message,
+        tone
+      });
+      void loadData();
+    });
+
+    socket.on('refresh_dashboard', () => {
+      void loadData();
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [token, user]);
 
   const menuItems = useMemo(() => menu.flatMap((category) => category.items), [menu]);
@@ -98,9 +153,17 @@ export function ManagementPage() {
     if (!token || !user) return;
     try {
       const [dash, menuData, tableData, resData, ordData, kitData, payData, staffData, notifData] = await Promise.all([
-        api.dashboard(token), api.menu(), api.tables(token), 
-        api.reservations(token), api.orders(token), api.kitchen(token),
-        api.payments(token), api.staff(token), api.notifications(token)
+        api.dashboard(token),
+        api.menu(),
+        api.tables(token),
+        canView(user.role, 'service') ? api.reservations(token) : Promise.resolve([] as Reservation[]),
+        api.orders(token),
+        canView(user.role, 'kitchen') ? api.kitchen(token) : Promise.resolve([] as Order[]),
+        canView(user.role, 'cashier') || user.role === 'super_admin' || user.role === 'admin'
+          ? api.payments(token)
+          : Promise.resolve([] as Payment[]),
+        canView(user.role, 'team') ? api.staff(token) : Promise.resolve([] as AuthUser[]),
+        api.notifications(token)
       ]);
       setSummary(dash); setMenu(menuData); setTables(tableData); setReservations(resData);
       setOrders(ordData); setKitchenTickets(kitData); setPayments(payData);
@@ -119,6 +182,7 @@ export function ManagementPage() {
 
   return (
     <main className="min-h-screen bg-[#f8f5f0] text-forest font-sans selection:bg-gold/30">
+      <ToastStack items={toasts} onDismiss={(id) => setToasts((current) => current.filter((toast) => toast.id !== id))} />
       {/* Header Overlay */}
       <div className="absolute top-0 left-0 right-0 h-[400px] bg-[#0f1d18] -z-10" />
 
@@ -276,9 +340,10 @@ export function ManagementPage() {
                 onReservationDrop={(rid, tid) => api.assignReservationTable(rid, tid, authToken).then(loadData)}
                 onOrderDrop={(oid, tid) => api.moveOrderTable(oid, tid, authToken).then(loadData)}
                 onStatusChange={(tid, s) => api.updateTableStatus(tid, s, authToken).then(loadData)}
-                onUpdateTablePosition={(tid, posX, posY) => api.updateTable(tid, { posX, posY }, authToken).then(loadData)}
+               onUpdateTablePosition={(tid, posX, posY) => api.updateTable(tid, { posX, posY }, authToken).then(loadData)}
                 menu={menu}
                 onCreateOrder={(payload) => api.createOrder({ ...payload, serverId: user.id }, authToken).then(loadData)}
+                onUpdateOrderStatus={(orderId, status) => api.updateOrderStatus(orderId, status, authToken).then(loadData)}
                />
             )}
 
