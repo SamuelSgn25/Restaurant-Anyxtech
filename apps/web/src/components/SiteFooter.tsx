@@ -16,7 +16,7 @@ export function SiteFooter() {
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gold">Navigation</p>
             <div className="mt-3 space-y-2 text-sm text-white/70">
-              {siteContent.pages.map((item) => (
+              {siteContent.pages.filter((item) => item.slug !== '/experience').map((item) => (
                 <p key={item.slug}>{item.label}</p>
               ))}
             </div>
