@@ -1,13 +1,11 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { SectionRenderer } from '../modules/sections/SectionRenderer';
 import { siteContent } from '../content/site-content';
 import { api } from '../lib/api';
-import { RestaurantTable } from '../types/management';
 import { User, Mail, Phone, Users, Calendar, MessageSquare, MapPin, Sparkles, CheckCircle, ShieldCheck } from 'lucide-react';
 
 export function PublicReservationPage() {
   const page = siteContent.pages.find((entry) => entry.slug === '/reservation');
-  const [tables, setTables] = useState<RestaurantTable[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -20,14 +18,7 @@ export function PublicReservationPage() {
     notes: '', 
     preferredZone: 'Salle principale' 
   });
-
-  useEffect(() => { 
-    void api.publicTables()
-      .then(setTables)
-      .catch(() => setTables([])); 
-  }, []);
-
-  const zones = useMemo(() => Array.from(new Set(tables.map((table) => table.zone))), [tables]);
+  const zones = ['Salle principale', 'Terrasse', 'VIP'];
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -157,11 +148,7 @@ export function PublicReservationPage() {
                       value={form.preferredZone} 
                       onChange={(e) => setForm({ ...form, preferredZone: e.target.value })} 
                       className="w-full bg-[#f8f5f0]/50 border-none rounded-2xl px-6 py-4 font-bold text-sm focus:ring-2 ring-gold transition-all duration-300"
-                    >
-                      {zones.length > 0 ? zones.map((zone) => <option key={zone} value={zone}>{zone}</option>) : <option value="Salle principale">Salle principale</option>}
-                      {!zones.includes('Terrasse') && <option value="Terrasse">Terrasse</option>}
-                      {!zones.includes('VIP') && <option value="VIP">VIP</option>}
-                    </select>
+                    >{zones.map((zone) => <option key={zone} value={zone}>{zone}</option>)}</select>
                   </div>
 
                   <div className="space-y-3 group sm:col-span-2">
@@ -240,6 +227,12 @@ export function PublicReservationPage() {
                              <p className="text-[10px] font-black text-forest/30 uppercase tracking-widest">Email</p>
                              <p className="text-sm font-bold text-ink/70">le-cactus@cactus.bj</p>
                           </div>
+                       </div>
+                       <div className="rounded-[1.5rem] bg-sand/40 p-5">
+                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-forest/35">Confirmation</p>
+                          <p className="mt-3 text-sm leading-7 text-ink/70">
+                            Chaque demande est revue par l'equipe du restaurant afin de confirmer l'horaire, la zone souhaitee et les besoins particuliers.
+                          </p>
                        </div>
                     </div>
                  </div>
