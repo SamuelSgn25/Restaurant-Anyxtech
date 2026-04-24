@@ -19,6 +19,10 @@ export class CreateMenuItemDto {
   available?: boolean;
 
   @IsOptional()
+  @IsString()
+  image?: string;
+
+  @IsOptional()
   @IsArray()
   tags?: string[];
 }
