@@ -49,23 +49,37 @@ export function FloorPlanConfig({ onSave, token }: { onSave?: () => void; token?
     if (!token) return;
     setIsSaving(true);
     try {
-      // Generate and create tables for each zone
+      const existingTables = await api.tables(token);
+
+      for (const table of existingTables) {
+        await api.deleteTable(table.id, token).catch(() => undefined);
+      }
+
       for (const zone of zones) {
+        const columns = Math.min(zone.tableCount, zone.name === 'VIP' ? 2 : 4);
+        const horizontalGap = columns === 1 ? 0 : 62 / Math.max(columns - 1, 1);
+        const baseX = 10;
+        const baseY = zone.name === 'VIP' ? 18 : 16;
+
         for (let i = 0; i < zone.tableCount; i++) {
-          // Generate random positions within the zone area
-          const posX = Math.random() * 70 + 10; // Between 10-80%
-          const posY = Math.random() * 70 + 10;
-          const tableLabel = `${zone.name.substring(0, 1)}${i + 1}`;
+          const row = Math.floor(i / columns);
+          const column = i % columns;
+          const posX = baseX + column * horizontalGap;
+          const posY = baseY + row * 24;
+          const prefix = zone.name === 'Salle Principale' ? 'SP' : zone.name === 'Terrasse' ? 'TR' : 'VIP';
+          const tableLabel = `${prefix}-${String(i + 1).padStart(2, '0')}`;
+          const shape = zone.name === 'VIP' ? 'booth' : i % 3 === 0 ? 'square' : 'round';
+          const size = zone.name === 'VIP' ? { width: 18, height: 12 } : shape === 'square' ? { width: 14, height: 14 } : { width: 13, height: 13 };
           
           await api.createTable({
             label: tableLabel,
             zone: zone.name,
             seats: zone.defaultSeats,
-            shape: 'round' as const,
+            shape,
             posX,
             posY,
-            width: 6,
-            height: 6,
+            width: size.width,
+            height: size.height,
             status: 'available' as const
           }, token);
         }
@@ -270,12 +284,12 @@ export function FloorPlanConfig({ onSave, token }: { onSave?: () => void; token?
           {isSaving ? (
             <>
               <Loader size={18} className="animate-spin" />
-              Génération en cours...
+              Regeneration du plan en cours...
             </>
           ) : (
             <>
               <Check size={18} />
-              Enregistrer & Générer Tables
+              Regenerer tout le plan de salle
             </>
           )}
         </button>
