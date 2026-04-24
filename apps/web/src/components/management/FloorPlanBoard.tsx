@@ -24,6 +24,45 @@ interface FloorPlanProps {
   onUpdateOrderStatus?: (orderId: string, status: Order['status']) => Promise<void>;
 }
 
+function renderChairs(table: RestaurantTable) {
+  const chairCount = Math.min(Math.max(table.seats, 2), 10);
+
+  if (table.shape === 'round') {
+    return Array.from({ length: chairCount }).map((_, index) => {
+      const angle = (Math.PI * 2 * index) / chairCount;
+      const x = 50 + Math.cos(angle) * 41;
+      const y = 50 + Math.sin(angle) * 41;
+
+      return (
+        <span
+          key={`chair-${table.id}-${index}`}
+          className="absolute h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/80 bg-[#f4ecdd] shadow-sm"
+          style={{ left: `${x}%`, top: `${y}%` }}
+        />
+      );
+    });
+  }
+
+  const seatsTop = Math.ceil(chairCount / 2);
+  const seatsBottom = chairCount - seatsTop;
+  const top = Array.from({ length: seatsTop }).map((_, index) => (
+    <span
+      key={`chair-top-${table.id}-${index}`}
+      className="absolute top-1.5 h-3.5 w-3.5 rounded-full border border-white/80 bg-[#f4ecdd] shadow-sm"
+      style={{ left: `${18 + index * (64 / Math.max(seatsTop - 1, 1))}%` }}
+    />
+  ));
+  const bottom = Array.from({ length: seatsBottom }).map((_, index) => (
+    <span
+      key={`chair-bottom-${table.id}-${index}`}
+      className="absolute bottom-1.5 h-3.5 w-3.5 rounded-full border border-white/80 bg-[#f4ecdd] shadow-sm"
+      style={{ left: `${18 + index * (64 / Math.max(seatsBottom - 1, 1))}%` }}
+    />
+  ));
+
+  return [...top, ...bottom];
+}
+
 export function FloorPlanBoard({
   tables,
   reservations,
@@ -88,6 +127,12 @@ export function FloorPlanBoard({
   const totalAdditif = activeOrders.reduce((sum, o) => sum + o.total, 0);
   const activeReservation = useMemo(() => reservations.find((r) => r.tableId === detailsModal), [reservations, detailsModal]);
   const currentOrder = activeOrders[0] ?? null;
+  const zoneStats = useMemo(() => ({
+    available: filteredTables.filter((table) => table.status === 'available').length,
+    occupied: filteredTables.filter((table) => table.status === 'occupied').length,
+    reserved: filteredTables.filter((table) => table.status === 'reserved').length,
+    cleaning: filteredTables.filter((table) => table.status === 'cleaning').length
+  }), [filteredTables]);
 
   return (
     <>
@@ -107,8 +152,32 @@ export function FloorPlanBoard({
         <div className="relative flex flex-col h-full min-h-[700px] bg-white rounded-[2.5rem] border border-forest/5 shadow-xl overflow-hidden">
       
       {/* Upper Control Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between p-6 gap-4 border-b border-forest/5 bg-sand/20">
-        <div className="flex bg-white rounded-2xl p-1.5 shadow-sm border border-forest/5">
+      <div className="flex flex-col gap-5 border-b border-forest/5 bg-[linear-gradient(135deg,#f8f4ed,white)] p-6">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.35em] text-forest/35">Plan de salle interactif</p>
+            <h2 className="mt-2 font-display text-3xl text-forest">Lecture instantanee du service, zone par zone</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-7 text-forest/55">
+              Visualisez les tables, les chaises, l occupation, les reservations confirmees et les temps de rotation dans une vue plus proche d un vrai POS.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              { label: 'Libres', value: zoneStats.available, tone: 'bg-emerald-50 text-emerald-700' },
+              { label: 'Occupees', value: zoneStats.occupied, tone: 'bg-rose-50 text-rose-700' },
+              { label: 'Reservees', value: zoneStats.reserved, tone: 'bg-orange-50 text-orange-700' },
+              { label: 'Nettoyage', value: zoneStats.cleaning, tone: 'bg-slate-100 text-slate-700' }
+            ].map((item) => (
+              <div key={item.label} className={`rounded-[1.2rem] px-4 py-3 ${item.tone}`}>
+                <p className="text-[10px] font-black uppercase tracking-[0.22em]">{item.label}</p>
+                <p className="mt-2 font-display text-3xl">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap gap-2 rounded-2xl bg-white p-1.5 shadow-sm border border-forest/5">
           {(zones.length > 0 ? zones : ['Salle principale']).map((zone) => (
             <button
               key={zone}
@@ -120,7 +189,7 @@ export function FloorPlanBoard({
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button 
             onClick={() => setConfigMode(true)}
             className={['flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-sm', 'bg-white text-forest border border-forest/10 hover:bg-forest/5'].join(' ')}
@@ -137,11 +206,12 @@ export function FloorPlanBoard({
           </button>
         </div>
       </div>
+      </div>
 
         <div className="flex-1 lg:flex min-h-0 bg-[#fbf9f6] relative">
         
         {/* Reservation Sidebar for D&D */}
-        <aside className="w-full lg:w-72 bg-sand/30 border-r border-forest/5 p-6 space-y-6 overflow-auto custom-scrollbar">
+        <aside className="w-full lg:w-80 bg-[linear-gradient(180deg,#fbf6ed,white)] border-r border-forest/5 p-6 space-y-6 overflow-auto custom-scrollbar">
            <div>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-forest/30 mb-4">Attente & Résas</p>
               <div className="space-y-3">
@@ -191,7 +261,7 @@ export function FloorPlanBoard({
         {/* Main Floor Grid */}
         <div 
          ref={containerRef}
-         className="flex-1 relative p-12 overflow-hidden bg-[radial-gradient(#13261f_1px,transparent_1px)] bg-[size:40px_40px] bg-opacity-[0.02]"
+         className="flex-1 relative overflow-hidden bg-[radial-gradient(#13261f_1px,transparent_1px)] bg-[size:42px_42px] bg-opacity-[0.03] p-12"
          onPointerMove={(e) => {
             if(!isEditMode || !dragTableId || !containerRef.current) return;
             const parent = containerRef.current.getBoundingClientRect();
@@ -230,14 +300,14 @@ export function FloorPlanBoard({
              const tRes = reservations.find(r => r.tableId === table.id && (r.status === 'pending' || r.status === 'confirmed'));
 
              return (
-               <div 
+             <div 
                 key={table.id}
                 id={`table-${table.id}`}
                 style={{ 
                   left: dragTableId === table.id ? undefined : `${table.posX}%`, 
                   top: dragTableId === table.id ? undefined : `${table.posY}%`,
-                  width: `${table.width * 10}px`,
-                  height: `${table.height * 10}px`,
+                  width: `${table.width * 11}px`,
+                  height: `${table.height * 11}px`,
                   position: 'absolute'
                 }}
                 className={['transition-all duration-300 select-none p-1', isEditMode ? 'cursor-move z-10 hover:scale-105' : ''].join(' ')}
@@ -258,14 +328,16 @@ export function FloorPlanBoard({
                  <button
                   onClick={() => setDetailsModal(table.id)}
                   className={[
-                    'w-full h-full border-2 transition-all flex flex-col items-center justify-center relative overflow-hidden',
+                    'w-full h-full border-2 transition-all flex flex-col items-center justify-center relative overflow-hidden ring-8',
                     tableShapeClass(table.shape),
                     getTableColor(table.status),
                     isEditMode ? 'animate-pulse scale-95 border-dashed bg-white shadow-none' : 'shadow-lg hover:scale-105 active:scale-95'
                   ].join(' ')}
                  >
+                    {renderChairs(table)}
                     {/* Interior patterns for status */}
                     <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+                    <div className="absolute inset-[16%] rounded-[inherit] border border-white/40 pointer-events-none" />
                     
                     <p className="font-display text-2xl font-bold tracking-tight">{table.label}</p>
                     
@@ -275,7 +347,7 @@ export function FloorPlanBoard({
                     </div>
 
                     {table.status === 'occupied' && (
-                       <div className="mt-2 text-[10px] font-bold text-rose-800 bg-white/40 px-3 py-1 rounded-full animate-pulse">
+                       <div className="mt-2 text-[10px] font-bold text-rose-800 bg-white/60 px-3 py-1 rounded-full animate-pulse">
                          {tOrder ? formatElapsedTime(tOrder.createdAt) : '0 min'}
                        </div>
                     )}
@@ -313,7 +385,7 @@ export function FloorPlanBoard({
       {/* Details Modal */}
       {detailsModal && selectedTable && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0f1d18]/60 p-4 backdrop-blur-md">
-           <div className="w-full max-w-lg bg-white rounded-[3rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+           <div className="w-full max-w-xl bg-white rounded-[3rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
               <div className="relative p-10 pb-4 text-center">
                  <button onClick={() => setDetailsModal(null)} className="absolute top-8 right-8 text-forest/20 hover:text-forest transition-colors">
                     <X size={24} />
