@@ -15,13 +15,11 @@ describe('App', () => {
       </BrowserRouter>
     );
 
-    // Check for header branding by looking for "Le Cactus" with "Hotel restaurant" using function matcher
     const allCactusElements = screen.getAllByText('Le Cactus');
     expect(allCactusElements.length).toBeGreaterThan(0);
-    
     expect(screen.getByText(/Hotel restaurant/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Une Odyssée culinaire entre Terre et Mer/i)
+      screen.getByText(/Une table raffinee pour les dejeuners, les diners et les moments a celebrer/i)
     ).toBeInTheDocument();
   });
 });
